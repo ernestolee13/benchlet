@@ -81,6 +81,22 @@ def _load_registry(root: Path) -> list:
     return out
 
 
+def _cost_stat(root: Path) -> dict:
+    """레지스트리 결과 전체에서 판정 1건(항목 × 모델) 평균 비용(USD). 원화는 1,400원/달러 고정 환산."""
+    tot, n = 0.0, 0
+    for p in (root / "registry" / "benches").glob("*/*/results/*.json"):
+        try:
+            d = json.loads(p.read_text(encoding="utf-8"))
+        except Exception:            # noqa: BLE001
+            continue
+        for it in d.get("items") or []:
+            for a in (it.get("arms") or {}).values():
+                if isinstance(a, dict) and a.get("cost") is not None and not a.get("err"):
+                    tot += float(a["cost"]); n += 1
+    usd = tot / n if n else 0.0
+    return {"per_judgment_usd": usd, "per_judgment_krw": usd * 1400, "n_judgments": n}
+
+
 def _model_counts(benches: list) -> dict:
     """갤러리에 등장한 서로 다른 모델 수. 직접 돌린 모델(arms_meta), 커뮤니티 제출 모델, 축약 시드의 원천 리더보드 모델을 합친다(이름 소문자 기준 중복 제거)."""
     def norm(x):
@@ -151,11 +167,71 @@ def _recall_summary(root: Path) -> str:
     return ""
 
 
+EN_DESCRIPTION = ("Small judgment benchmarks built from your own data. Pull 40 to 100 items from an approval gate, classifier, router or tool-call decision, "
+                  "run general LLMs and judgment-only models like Jev under identical conditions, and see which model fits that decision. Shared through the author's own GitHub repo.")
+
+
+def _en_page(data: dict) -> str:
+    """영어 랜딩(정적). 갤러리 UI 는 한국어지만 벤치 데이터와 도구는 영어로도 쓴다. SEO 용 별도 URL /en."""
+    n = len(data["benches"]); n_items = sum(b.get("n") or 0 for b in data["benches"])
+    models = data.get("models") or {}; cost = data.get("cost") or {}
+    ex = next((b for b in data["benches"] if b["name"] == "editorial-norm"), None)
+    rows = []
+    if ex:
+        for a, st in sorted((ex.get("result_summary") or {}).items(), key=lambda kv: -(kv[1].get("acc") or 0)):
+            if st.get("acc") is not None:
+                rows.append((((ex.get("arms_meta") or {}).get(a) or {}).get("model") or a, st["acc"]))
+    bars = "".join(f'<span>{_esc(m)}</span><div class="bar"><i style="width:{round(acc*100)}%"></i></div><span>{acc*100:.1f}%</span>' for m, acc in rows)
+    graph = {"@context": "https://schema.org", "@graph": [
+        {"@type": "WebPage", "@id": SITE_URL + "/en#page", "url": SITE_URL + "/en", "name": "benchlet: judgment mini-benchmarks from your own data", "inLanguage": "en", "description": EN_DESCRIPTION, "isPartOf": {"@id": SITE_URL + "#site"}},
+        {"@type": "FAQPage", "mainEntity": [
+            {"@type": "Question", "name": "What is a judgment mini-benchmark?", "acceptedAnswer": {"@type": "Answer", "text": "40 to 100 binary or multiple-choice items pulled from a decision point in your own code: approval gates, rule checks, routers, tool-call gates, grounding checks. It asks for a judgment, not for knowledge."}},
+            {"@type": "Question", "name": "Do I need to run models to publish?", "acceptedAnswer": {"@type": "Answer", "text": "No. Publish without a key and the registry runs a few example models once. To run yourself, any OpenAI-compatible endpoint that returns first-token logprobs works."}},
+            {"@type": "Question", "name": "Which models are used?", "acceptedAnswer": {"@type": "Answer", "text": "None are fixed. Cheap-input frontier models, 20 to 30B models and Jev-like judgment models all work. The gallery currently shows results from glm-4.7-flash, qwen3.8-27b, deepseek-v4-flash and jev-1.13, plus source leaderboard scores on distilled seeds."}}]}]}
+    head = (f'<title>benchlet | judgment mini-benchmarks from your own data</title>\n<meta name="description" content="{_esc(EN_DESCRIPTION)}">\n'
+            f'<link rel="canonical" href="{SITE_URL}/en">\n<link rel="alternate" hreflang="en" href="{SITE_URL}/en">\n<link rel="alternate" hreflang="ko" href="{SITE_URL}/">\n<link rel="alternate" hreflang="x-default" href="{SITE_URL}/">\n'
+            f'<meta property="og:type" content="website"><meta property="og:url" content="{SITE_URL}/en"><meta property="og:site_name" content="benchlet"><meta property="og:title" content="benchlet | judgment mini-benchmarks from your own data"><meta property="og:description" content="{_esc(EN_DESCRIPTION)}"><meta property="og:image" content="{SITE_URL}/og-image.png"><meta property="og:locale" content="en_US">\n'
+            f'<meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="benchlet"><meta name="twitter:description" content="{_esc(EN_DESCRIPTION)}"><meta name="twitter:image" content="{SITE_URL}/og-image.png">\n'
+            f'<script type="application/ld+json">{json.dumps(graph, ensure_ascii=False)}</script>\n')
+    body = f'''<header class="top"><div class="wrap"><a class="brand" href="/en"><img class="logo" src="img/mascot-scale-v2c.png" alt="" width="28" height="28">benchlet <small>your own work benches for judgment logic</small></a><a class="lang" href="/" hreflang="ko" lang="ko">한국어</a></div></header>
+<main class="wrap">
+<section class="hero herogrid"><div><p class="eyebrow">Your own work bench for judgment logic</p><h1 class="big">Which model fits this decision? Measure it on 100 items of your own data</h1>
+<p class="lead big">{_esc(EN_DESCRIPTION)} Nobody can memorize a benchmark built from your data. Browse other people's work benches and borrow their shape for yours.</p>
+<div class="cta"><a class="btn primary" href="https://github.com/ernestolee13/benchlet">Install the plugin</a><a class="btn" href="/#gallery">Browse {n} benches</a></div>
+<div class="stats"><div><b>{n}</b><span>benches</span></div><div><b>{n_items:,}</b><span>items</span></div><div><b>{models.get("total", 0)}</b><span>models (incl. public seeds)</span></div><div><b>${cost.get("per_judgment_usd", 0):.5f}</b><span>average cost per judgment</span></div></div></div>
+<div class="heroimg"><img src="img/muse-hero.png" alt="A small measuring instrument made of index cards and a balance weighing two speech bubbles" width="1920" height="1280"></div></section>
+<section class="sec"><h2>Three steps</h2><p class="sub">You can publish without running anything. Models are not fixed: any OpenAI-compatible endpoint that returns first-token logprobs works, with <code>custom:&lt;model&gt;</code>.</p>
+<div class="steps"><div class="step"><span class="n">1</span><h3>Install</h3><p>One Claude Code plugin. It adds the author skill and the bench_* MCP tools.</p><pre>claude plugin marketplace add ernestolee13/benchlet
+claude plugin install benchlet</pre></div>
+<div class="step"><span class="n">2</span><h3>Ask</h3><p>The skill reads your project, proposes decision points, builds the items and reviews them.</p><pre>/minibench-author build my own bench
+for this project</pre></div>
+<div class="step"><span class="n">3</span><h3>Publish and compare</h3><p>It goes to your own GitHub repo. To run it yourself you need one logprob endpoint and one key. Examples: glm-4.7-flash, qwen3.8-27b, deepseek-v4-flash, jev-1.13. Cheap frontier models, 20 to 30B models and Jev-like judgment models are all fine.</p><pre>benchlet publish --bench my-norm --github
+benchlet run --bench my-norm --arms glm,qwen,jev</pre></div></div></section>
+{f'<section class="sec"><h2>One worked example: which model fits an approval-summary gate</h2><div class="example"><div><p class="sub">{ex["n"]} items from a news approval queue asking whether a summary sentence violates the editorial norms. Same items, same template, four models.</p><div class="bars">{bars}</div><p class="sub">Reading it: Jev and DeepSeek fit this decision; the two cheapest models sit near 60% and should not be used here. When a new model ships, rerun the same bench. Gaps under 15 points cannot be resolved with 100 items.</p><p><a class="btn" href="/#b-{_esc(ex["name"])}">Bench detail</a> <a class="btn" href="/#recommend">Which model per task type</a></p></div><div class="flowimg"><img src="img/muse-flow.png" alt="Four stations on a conveyor: reading code, a review stamp, publishing, comparing models" width="1920" height="1280"></div></div></section>' if ex else ''}
+<section class="sec"><h2>Browse, borrow, publish</h2><ol class="journey">
+<li><div class="jn">1</div><div class="jb"><h3>Browse</h3><p>Every bench in the gallery is somebody's real work decision. The question, the choices, the class table and which model got it right are all visible.</p></div></li>
+<li><div class="jn">2</div><div class="jb"><h3>Fork a similar bench and fill it with your data</h3><p>Before building a new bench the skill searches the gallery and asks whether to fork. You keep the question, choices and class table and only the items are yours. Lineage is recorded.</p></div></li>
+<li><div class="jn">3</div><div class="jb"><h3>Publish to your repo, preferably public</h3><p>Benches are built to be publishable from the start: raw data never leaves, only the generator, five samples and results go up, and a PII scan must pass. It lives in your GitHub repo, so you can take it down any time.</p></div></li>
+<li class="next"><div class="jn">4</div><div class="jb"><h3>Next: we run your bench on major models</h3><p>When the operator has spare credits or a sponsorship, benches you publish will be run on major models and their scores updated. Today the registry runs four example models once.</p></div></li></ol></section>
+<section class="sec"><h2>What this service does</h2><ul class="featlist">
+<li>If a bench looks useful you do not just read it: you can run a new model and add your score.</li>
+<li>When three different people land within 5 points on the same version, the bench gets a verified badge and the median becomes the official score. The author's own runs do not count.</li>
+<li>Publish it and the operator reruns it on a few representative models as budget allows.</li>
+<li>Models are not fixed. Any model that returns logprobs works: cheap frontier models, 20 to 30B models, Jev-like judgment models.</li>
+<li>Benches live in the author's GitHub repo, with the exact model slugs, call template and decision rule shown.</li>
+<li>Distilled public seeds carry source leaderboard scores from dozens to hundreds of models, including GPT-5.1, Claude 4.5 and Gemini 3 Pro.</li></ul></section>
+<section class="sec"><h2>Limits</h2><p class="sub">40 to 100 items only separate gaps of 15 points or more. The operator has personally verified only four model and provider combinations on OpenRouter; other combinations are checked by the smoke test. Scores from a single author run are exactly that until the community verifies them.</p></section>
+<footer class="site"><span>benchlet</span><a href="https://github.com/ernestolee13/benchlet">tool repo</a><a href="https://github.com/ernestolee13/benchlet-benches">bench repo</a><a href="llms.txt">llms.txt</a><a href="/">한국어</a><span>MIT</span></footer>
+</main>'''
+    return ("<!doctype html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1, viewport-fit=cover\">\n"
+            + head + HEAD_PART.replace("<title>benchlet 갤러리</title>", "") + "\n</head>\n<body>\n" + body + "\n</body>\n</html>\n")
+
+
 def build_site(root: Path, out_dir: Path) -> Path:
     benches = _load_registry(root)
     from .taxonomy import load as _tload
     data = {"benches": benches, "owners": _owners(root), "guide": _guide(root), "recall": _recall_summary(root), "taxonomy": _tload(root),
-            "models": _model_counts(benches),
+            "models": _model_counts(benches), "cost": _cost_stat(root),
             "verified": json.loads((root / "results" / "or_verified.json").read_text(encoding="utf-8")) if (root / "results" / "or_verified.json").exists() else {}}
     out_dir.mkdir(parents=True, exist_ok=True)
     img_src = root / "docs" / "img"
@@ -176,6 +252,7 @@ def build_site(root: Path, out_dir: Path) -> Path:
             "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1, viewport-fit=cover\">\n"
             + _seo_head(data) + HEAD_PART + "\n</head>\n<body>\n" + body + "\n</body>\n</html>\n")
     (out_dir / "index.html").write_text(full, encoding="utf-8")
+    (out_dir / "en.html").write_text(_en_page(data), encoding="utf-8")
     (out_dir / "robots.txt").write_text(ROBOTS.replace("__URL__", SITE_URL), encoding="utf-8")
     (out_dir / "sitemap.xml").write_text(SITEMAP.replace("__URL__", SITE_URL).replace("__DATE__", dt.date.today().isoformat()), encoding="utf-8")
     (out_dir / "llms.txt").write_text(_llms(data), encoding="utf-8")
@@ -231,6 +308,7 @@ Sitemap: __URL__/sitemap.xml
 SITEMAP = """<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url><loc>__URL__/</loc><lastmod>__DATE__</lastmod><changefreq>weekly</changefreq><priority>1.0</priority></url>
+  <url><loc>__URL__/en</loc><lastmod>__DATE__</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
   <url><loc>__URL__/llms.txt</loc><lastmod>__DATE__</lastmod><changefreq>monthly</changefreq><priority>0.3</priority></url>
 </urlset>
 """
@@ -242,6 +320,8 @@ def _esc(s) -> str:
 
 def _seo_head(data: dict) -> str:
     title = "benchlet | 내 데이터로 만든 판정 미니벤치 갤러리"
+    hreflang = (f'<link rel="alternate" hreflang="ko" href="{SITE_URL}/">\n<link rel="alternate" hreflang="en" href="{SITE_URL}/en">\n'
+                f'<link rel="alternate" hreflang="x-default" href="{SITE_URL}/">\n')
     n = len(data["benches"])
     graph = {"@context": "https://schema.org", "@graph": [
         {"@type": "Organization", "@id": SITE_URL + "#org", "name": SITE_NAME, "url": SITE_URL, "description": DESCRIPTION,
@@ -257,7 +337,7 @@ def _seo_head(data: dict) -> str:
                       "license": "https://creativecommons.org/licenses/by/4.0/" if b.get("license") == "CC-BY-4.0" else None}
                      for b in data["benches"]]},
     ]}
-    return "\n".join([
+    return hreflang + "\n".join([
         f'<meta name="description" content="{_esc(DESCRIPTION)}">',
         f'<link rel="canonical" href="{SITE_URL}/">',
         '<meta name="theme-color" content="#0f6f68">',
@@ -322,6 +402,7 @@ header.top{position:sticky;top:env(safe-area-inset-top,0px);background:var(--bg)
 header.top .wrap{display:flex;align-items:center;gap:18px;flex-wrap:wrap;padding-block:12px}
 .brand{font-weight:600;letter-spacing:.02em;text-decoration:none;color:var(--fg);display:inline-flex;align-items:center;gap:8px}
 .brand .logo{width:28px;height:28px;border-radius:6px}
+.lang{margin-left:auto;color:var(--muted);text-decoration:none;font-size:.85rem;border:1px solid var(--line);border-radius:999px;padding:2px 10px}
 .brand small{color:var(--muted);font-weight:400;margin-left:8px}
 nav a{color:var(--muted);text-decoration:none;margin-right:14px;padding:4px 0;border-bottom:2px solid transparent}
 nav a.on{color:var(--fg);border-color:var(--accent)}
@@ -429,7 +510,7 @@ footer.site{margin-top:48px;border-top:1px solid var(--line);padding-top:16px;co
 '''
 
 BODY_PART = r'''<header class="top"><div class="wrap">
-  <a class="brand" href="#home"><img class="logo" src="img/mascot-scale-v2c.png" alt="" width="28" height="28">benchlet <small>판단 로직을 위한 나만의 작업 벤치</small></a>
+  <a class="brand" href="#home"><img class="logo" src="img/mascot-scale-v2c.png" alt="" width="28" height="28">benchlet <small>판단 로직을 위한 나만의 작업 벤치</small></a><a class="lang" href="en" hreflang="en" lang="en">EN</a>
   <nav><a href="#home" data-v="home">소개</a><a href="#gallery" data-v="gallery">갤러리</a><a href="#recommend" data-v="recommend">유형별 추천</a><a href="#guide" data-v="guide">내 벤치 만들기</a></nav>
 </div></header>
 <main class="wrap" id="main">__STATIC_HOME__</main>
@@ -493,7 +574,7 @@ function home() {
     <div><p class="eyebrow">판단 로직을 위한 나만의 작업 벤치</p><h1 class="big">이 판정엔 어느 모델이 맞나.<br>내 데이터 100건으로 잰다</h1>
     <p class="lead big">승인 게이트, 분류, 라우팅, 도구 호출 같은 판단 지점에서 40~100건을 뽑아 일반 LLM 과 Jev 같은 판단 전용 모델을 같은 조건으로 비교한다. 내 데이터로 만든 벤치라 어떤 모델도 외우지 못한다. 남들이 올린 작업 벤치를 구경하고, 그걸 참조해 내 것을 만든다.</p>
     <div class="cta"><a class="btn primary" href="#guide">내 벤치 만들기</a><a class="btn" href="#gallery">갤러리 ${D.benches.length}개 보기</a></div>
-    <div class="stats"><div><b>${D.benches.length}</b><span>벤치</span></div><div><b>${nItems.toLocaleString()}</b><span>항목</span></div><div><b>${(D.models||{}).total || 0}</b><span>모델 (직접 돌린 ${(D.models||{}).run || 0} + 원천 리더보드 ${(D.models||{}).source || 0})</span></div><div><b>1¢</b><span>100건을 모델 넷에 돌리는 비용</span></div></div></div>
+    <div class="stats"><div><b>${D.benches.length}</b><span>벤치</span></div><div><b>${nItems.toLocaleString()}</b><span>항목</span></div><div><b>${(D.models||{}).total || 0}</b><span>모델 (공개 벤치 포함)</span></div><div><b>${((D.cost||{}).per_judgment_krw || 0).toFixed(2)}원</b><span>판정 1건 평균 평가 비용</span></div></div></div>
     <div class="heroimg"><img src="img/muse-hero.png" alt="인덱스 카드로 만든 작은 측정 도구와 두 응답을 재는 저울" width="1920" height="1280"></div></section>
   <section class="sec"><h2>세 단계</h2><p class="sub">돌리지 않아도 올릴 수 있다. 올리면 레지스트리가 모델 넷을 한 번 돌려 결과를 붙인다. 모델은 정해져 있지 않다. 첫 토큰 로그프롭을 주는 OpenAI 호환 엔드포인트면 어떤 모델이든 <code>custom:&lt;모델&gt;</code> 로 돌린다.</p>
     <div class="steps">
