@@ -186,7 +186,7 @@ DESCRIPTION = ("내 판정 로직(승인 게이트, 분류, 라우팅, 도구 �
                "이 일에 어느 모델을 쓸지 고르고, 그 벤치와 결과를 남이 재사용하게 하는 갤러리.")
 FAQ = [
     ("판정 미니벤치가 무엇인가요?", "내 코드의 판정 지점(승인 게이트, 규칙 심사, 라우터, 추출 검증)에서 뽑은 40~100건짜리 이진 또는 다지 문항이다. 지식을 묻지 않고 규칙 준수나 사실 도출만 묻는다."),
-    ("실행하지 않아도 올릴 수 있나요?", "그렇다. 키가 없으면 벤치만 게시한다. 레지스트리가 기본 모델 넷을 한 번 돌려 결과를 붙인다. 직접 돌리려면 첫 토큰 로그프롭을 주는 OpenAI 호환 엔드포인트 아무거나와 키 하나면 된다. 모델도 엔드포인트도 고정이 아니다."),
+    ("실행하지 않아도 올릴 수 있나요?", "그렇다. 키가 없으면 벤치만 게시한다. 레지스트리가 예시 모델 넷을 한 번 돌려 결과를 붙인다. 직접 돌리려면 첫 토큰 로그프롭을 주는 OpenAI 호환 엔드포인트 아무거나와 키 하나면 된다. 모델도 엔드포인트도 정해져 있지 않다. 입력이 싼 프런티어 모델, 20~30B 급 모델, Jev 류 판단 전용 모델 모두 된다."),
     ("어떤 모델과 방식으로 실험하나요?", "벤치마다 정확한 모델 슬러그, provider, 확률 출처(logprob, typed, none), 호출 템플릿(max_tokens 1, temperature 0, 추론 끄기, provider 고정), 극성 반전과 셔플, 결정 규칙(이진 0.5, 다지 argmax)을 상세 페이지에 적는다."),
     ("얼마나 정확한가요?", "40~60건은 15pp 이상 차이만 보인다. 미세 순위는 내지 않는다. 정확도에 Wilson 95% 구간을 붙이고 AUROC 는 진단용으로만 쓴다."),
     ("누가 올렸는지 어떻게 아나요?", "작성자는 GitHub 계정으로 드러나고 생성기 리포에 링크된다. 결과에는 작성자 실행과 레지스트리 실행의 출처 배지가 붙는다."),
@@ -275,7 +275,7 @@ def _llms(data: dict) -> str:
              "## Core concepts", "",
              "- **판정 미니벤치**: 규칙 준수나 사실 도출만 묻는 40~100건 문항. 지식과 취향은 묻지 않는다.",
              "- **결정 규칙**: 이진 0.5, 다지 argmax. 임계 이동과 온도 보정으로 점수를 올리지 않는다. AUROC 는 진단용.",
-             "- **경로 0**: 실행 없이 게시. 레지스트리가 기본 모델을 한 번 돌려 결과를 붙인다. 모델과 엔드포인트는 사용자가 정한다(custom:<model>).",
+             "- **경로 0**: 실행 없이 게시. 레지스트리가 예시 모델 넷을 한 번 돌려 결과를 붙인다. 모델과 엔드포인트는 사용자가 정한다(custom:<model>). 확정된 기본값은 없다.",
              "- **검수 검사**: 교차 패밀리 불일치, 오답 쏠림, 순환, 음성 자명성, 유일해, 극성, 분포, 채점기 덤프. 우리가 손으로 잡은 결함 12개 중 11개를 소급 재현했다.",
              "- **작성자**: GitHub 계정이 신원이다. 결과에는 작성자 실행과 레지스트리 실행의 출처 배지가 붙는다.", "",
              "## Routes", "", "- / 랜딩. 갤러리, 유형별 추천, 만들기 가이드는 같은 페이지의 #gallery, #recommend, #guide.", "- /llms.txt 이 문서.", "",
@@ -286,7 +286,7 @@ def _llms(data: dict) -> str:
     lines += ["", "## FAQ", ""]
     for q, a in FAQ:
         lines += [f"**{q}**", a, ""]
-    lines += ["## Cautions", "", "40~60건은 15pp 이상 차이만 보인다. 미세 순위는 못 낸다. 로그프롭을 주는 엔드포인트면 어디든 되지만 운영자가 직접 확인한 조합은 OpenRouter 의 넷뿐이다. 라벨 타당성은 끝까지 사람에 묶인다.", "",
+    lines += ["## Cautions", "", "40~60건은 15pp 이상 차이만 보인다. 미세 순위는 못 낸다. 로그프롭을 주는 엔드포인트면 어디든 되지만 운영자가 직접 확인한 조합은 OpenRouter 의 예시 넷뿐이다. 라벨 타당성은 끝까지 사람에 묶인다.", "",
               "## Tech stack", "", "Python 3.9 패키지(bench-core), 의존성 없는 MCP stdio 서버, 정적 HTML 갤러리(Vercel).", ""]
     return "\n".join(lines)
 
@@ -451,7 +451,7 @@ function card(b) {
   const badges = [...new Set(rows.map(([, s]) => s.source_badge || 'author-run'))].map(x => x === 'registry-run' ? '레지스트리 실행' : '작성자 실행');
   const cm = b.community || {};
   const verified = Object.values(cm.models || {}).filter(x => x.verified).length;
-  const status = (rows.length ? `${badges.join('+')} 모델 ${rows.length}개 · ${esc(b.experiment.date || b.published_at)}` : '기본 모델 실행 대기') + (cm.n_submissions ? ` · 커뮤니티 ${cm.n_submissions}건${verified ? ` (검증 ${verified})` : ''}` : '');
+  const status = (rows.length ? `${badges.join('+')} 모델 ${rows.length}개 · ${esc(b.experiment.date || b.published_at)}` : '레지스트리 실행 대기') + (cm.n_submissions ? ` · 커뮤니티 ${cm.n_submissions}건${verified ? ` (검증 ${verified})` : ''}` : '');
   return `<article class="card" data-name="${esc(b.name)}" tabindex="0" role="link">
     <div class="q">${esc((b.question || '').split('\n')[0].split('. ')[0])}</div>
     <div class="name">${esc(b.name)} <span class="meta">v${b.version}</span> <span class="chip trust" title="${esc(trust(b).parts.map(p => p[0] + ' +' + p[1]).join(', ') || '신호 없음')}">신뢰 ${trust(b).score}</span></div>
@@ -473,15 +473,15 @@ function home() {
     <div><p class="eyebrow">판단 로직을 위한 나만의 작업 벤치</p><h1 class="big">이 판정엔 어느 모델이 맞나.<br>내 데이터 100건으로 잰다</h1>
     <p class="lead big">승인 게이트, 분류, 라우팅, 도구 호출 같은 판단 지점에서 40~100건을 뽑아 일반 LLM 과 Jev 같은 판단 전용 모델을 같은 조건으로 비교한다. 내 데이터로 만든 벤치라 어떤 모델도 외우지 못한다. 남들이 올린 작업 벤치를 구경하고, 그걸 참조해 내 것을 만든다.</p>
     <div class="cta"><a class="btn primary" href="#guide">내 벤치 만들기</a><a class="btn" href="#gallery">갤러리 ${D.benches.length}개 보기</a></div>
-    <div class="stats"><div><b>${D.benches.length}</b><span>벤치</span></div><div><b>${nItems.toLocaleString()}</b><span>항목</span></div><div><b>4</b><span>기본 모델 (지정 안 하면)</span></div><div><b>1¢</b><span>100건을 기본 넷에 돌리는 비용</span></div></div></div>
+    <div class="stats"><div><b>${D.benches.length}</b><span>벤치</span></div><div><b>${nItems.toLocaleString()}</b><span>항목</span></div><div><b>4</b><span>예시 모델 (바꿔도 된다)</span></div><div><b>1¢</b><span>100건을 모델 넷에 돌리는 비용</span></div></div></div>
     <div class="heroimg"><img src="img/muse-hero.png" alt="인덱스 카드로 만든 작은 측정 도구와 두 응답을 재는 저울" width="1920" height="1280"></div></section>
-  <section class="sec"><h2>세 단계</h2><p class="sub">돌리지 않아도 올릴 수 있다. 올리면 레지스트리가 기본 모델 넷을 한 번 돌려 결과를 붙인다. 모델은 고정이 아니다. 첫 토큰 로그프롭을 주는 OpenAI 호환 엔드포인트면 어떤 모델이든 <code>custom:&lt;모델&gt;</code> 로 돌린다.</p>
+  <section class="sec"><h2>세 단계</h2><p class="sub">돌리지 않아도 올릴 수 있다. 올리면 레지스트리가 모델 넷을 한 번 돌려 결과를 붙인다. 모델은 정해져 있지 않다. 첫 토큰 로그프롭을 주는 OpenAI 호환 엔드포인트면 어떤 모델이든 <code>custom:&lt;모델&gt;</code> 로 돌린다.</p>
     <div class="steps">
       <div class="step"><span class="n">1</span><h3>설치</h3><p>Claude Code 플러그인 하나. 만들기 스킬과 bench_* 툴이 붙는다.</p><pre>claude plugin marketplace add ernestolee13/benchlet
 claude plugin install benchlet</pre></div>
       <div class="step"><span class="n">2</span><h3>이렇게 시킨다</h3><p>스킬이 프로젝트를 읽어 판정 지점 후보를 찾고, 고르면 항목을 만들고 검수한다. 구체적인 판정(「승인 큐의 규범 위반」)을 말해도 된다.</p><pre>/minibench-author 이 프로젝트 기준으로
 나만의 벤치 만들어 줘</pre></div>
-      <div class="step"><span class="n">3</span><h3>올리고 비교한다</h3><p>내 GitHub 리포로 올라간다. 직접 돌리려면 로그프롭을 주는 엔드포인트 하나와 키 하나. 안 정하면 기본 넷(glm-4.7-flash, qwen3.8-27b, deepseek-v4-flash, jev-1.13)을 OpenRouter 로 쓴다.</p><pre>benchlet publish --bench my-norm --github
+      <div class="step"><span class="n">3</span><h3>올리고 비교한다</h3><p>내 GitHub 리포로 올라간다. 직접 돌리려면 로그프롭을 주는 엔드포인트 하나와 키 하나. 예시는 glm-4.7-flash, qwen3.8-27b, deepseek-v4-flash, jev-1.13 이고, 입력이 싼 프런티어 모델이나 20~30B 급 모델, Jev 류 판단 전용 모델이면 어떤 것이든 좋다.</p><pre>benchlet publish --bench my-norm --github
 benchlet run --bench my-norm --arms glm,qwen,jev</pre></div>
     </div></section>
   ${ex ? `<section class="sec"><h2>예시 한 흐름: 승인 요약 게이트에는 어느 모델이 맞나</h2>
@@ -496,13 +496,13 @@ benchlet run --bench my-norm --arms glm,qwen,jev</pre></div>
       <li><div class="jn">1</div><div class="jb"><h3>구경한다</h3><p>갤러리의 벤치는 전부 누군가의 실제 작업 판정이다. 질문, 선택지, 클래스 표, 어느 모델이 맞았는지가 그대로 보인다.</p></div></li>
       <li><div class="jn">2</div><div class="jb"><h3>비슷한 벤치를 포크해 내 데이터로 채운다</h3><p>스킬이 새 벤치를 만들기 전에 갤러리에서 비슷한 벤치를 찾아 「포크할까」를 묻는다. 질문과 선택지, 클래스 표를 가져오고 항목만 내 데이터로 채운다. 계보가 남는다.</p></div></li>
       <li><div class="jn">3</div><div class="jb"><h3>내 리포에 올린다, 가능하면 공개로</h3><p>벤치는 처음부터 공개해도 되는 수준으로 만들어진다. 원자료는 올라가지 않고 생성기와 표본 5건, 결과만 간다. 개인정보 스캔을 통과해야 올라가고, 내 GitHub 리포에 쌓이니 언제든 내릴 수 있다.</p></div></li>
-      <li class="next"><div class="jn">4</div><div class="jb"><h3>앞으로: 올린 벤치를 주요 모델로 우리가 돌린다</h3><p>운영자에게 여유 크레딧이 생기거나 지원 프로그램에 선정되면, 사용자가 올린 벤치를 주요 모델들로 돌려 결과를 붙일 계획이다. 지금은 기본 모델 넷을 한 번 돌려 붙인다.</p></div></li>
+      <li class="next"><div class="jn">4</div><div class="jb"><h3>앞으로: 올린 벤치를 주요 모델로 우리가 돌린다</h3><p>운영자에게 여유 크레딧이 생기거나 지원 프로그램에 선정되면, 사용자가 올린 벤치를 주요 모델들로 돌려 결과를 붙일 계획이다. 지금은 예시 모델 넷을 한 번 돌려 붙인다.</p></div></li>
     </ol></section>
   <section class="sec"><h2>이 서비스의 특징</h2>
     <dl class="feat">
       <dt>서로 검증</dt><dd>남의 벤치에 새 모델을 돌려 <code>benchlet submit</code> 으로 제출하면 내 리포의 community 폴더에 쌓이고 갤러리가 모은다. 같은 판본에 서로 다른 제출자 3명의 결과가 5pp 안에 모이면 「검증됨」 배지와 중앙값 공식 점수. 작성자 본인 제출은 세지 않고, 그 전까지는 「제출 n건」으로만 보인다.</dd>
-      <dt>운영자 재실행</dt><dd>결과 없는 벤치는 레지스트리가 기본 모델 넷을 한 번 돌려 「레지스트리 실행」 배지로 붙인다. 새 모델이 나오면 그 모델만 덧붙여 돌릴 수 있다.</dd>
-      <dt>모델과 엔드포인트는 자유</dt><dd>첫 토큰 로그프롭을 주는 OpenAI 호환 엔드포인트면 어떤 모델이든 <code>custom:&lt;모델&gt;</code> 로 돌린다. 지정하지 않으면 기본 넷(glm-4.7-flash, qwen3.8-27b, deepseek-v4-flash, jev-1.13). 스모크가 로그프롭·재현성·라벨 질량을 먼저 확인한다.</dd>
+      <dt>운영자 재실행</dt><dd>결과 없는 벤치는 레지스트리가 그때의 예시 모델 넷을 한 번 돌려 「레지스트리 실행」 배지로 붙인다. 새 모델이 나오면 그 모델만 덧붙여 돌릴 수 있다.</dd>
+      <dt>모델과 엔드포인트는 자유</dt><dd>첫 토큰 로그프롭을 주는 OpenAI 호환 엔드포인트면 어떤 모델이든 <code>custom:&lt;모델&gt;</code> 로 돌린다. 확정된 기본값은 두지 않는다. 새 모델이 계속 나오니 입력이 싼 프런티어 모델이나 20~30B 급 모델도 Jev 와 비슷한 속도와 점수를 내는 경우가 많고, Jev 류 판단 전용 모델이 따로 있으면 그것도 된다. 지금 갤러리의 예시 넷은 glm-4.7-flash, qwen3.8-27b, deepseek-v4-flash, jev-1.13 이다. 스모크가 로그프롭·재현성·라벨 질량을 먼저 확인한다.</dd>
       <dt>작성자가 곧 신원</dt><dd>벤치는 작성자의 GitHub 리포에 쌓이고 카드에 작성자가 보인다. 신뢰 점수는 커뮤니티 검증, 검수, 축약 검증, 작성자의 팔로워와 리포 스타를 더한 값이고 내역이 카드에 보인다.</dd>
       <dt>실행 없이 게시</dt><dd>키가 없어도 올릴 수 있다. 원자료는 올라가지 않고 생성기와 표본 5건, 결과만 간다. 개인정보 스캔을 통과해야 올라간다.</dd>
       <dt>공개 벤치 축약 시드</dt><dd>BFCL, JudgeBench, RewardBench 2, HELM 에서 모델별 항목 정오를 받아 100건으로 줄인 시드. 원천 모델 수십~수백 개(GPT-5.1, Claude 4.5, Gemini 3 Pro 포함)의 이 100건 정확도가 상세에 같이 보인다.</dd>
@@ -519,7 +519,7 @@ benchlet run --bench my-norm --arms glm,qwen,jev</pre></div>
     <p><a class="btn" href="#gallery">전부 보기</a> <a class="btn" href="#recommend">유형별 추천</a></p></section>
   <section class="sec"><h2>작성자</h2><p class="sub">벤치는 누가 올렸는지로 믿는다. 작성자는 GitHub 계정으로 드러나고, 생성기 리포에 스타를 남길 수 있다.</p>
     <div class="owners">${Object.values(D.owners).map(o => `<div class="ownercard">${ownerLine({ owner: o.handle }, true)}<div class="meta">${esc(o.bio || '')}</div><div class="meta">벤치 ${D.benches.filter(b => b.owner === o.handle).length}개 · 팔로워 ${(o.gh_stats||{}).followers ?? '-'} · 생성기 리포 ★${(o.gh_stats||{}).repo_stars ?? '-'} · 벤치 리포 ★${(o.gh_stats||{}).bench_repo_stars ?? '-'}</div></div>`).join('')}</div></section>
-  <section class="sec"><h2>한계</h2><p class="sub">40~100건은 15pp 이상 차이만 가른다. 미세한 순위는 못 낸다. 모델과 엔드포인트는 자유지만 운영자가 직접 확인한 조합은 OpenRouter 의 기본 넷뿐이고, 다른 조합은 스모크가 로그프롭 유무를 확인한다. 작성자 실행만 있는 점수는 작성자 실행이다.</p></section>
+  <section class="sec"><h2>한계</h2><p class="sub">40~100건은 15pp 이상 차이만 가른다. 미세한 순위는 못 낸다. 모델과 엔드포인트는 자유지만 운영자가 직접 확인한 조합은 OpenRouter 의 예시 넷뿐이고, 다른 조합은 스모크가 로그프롭 유무를 확인한다. 작성자 실행만 있는 점수는 작성자 실행이다.</p></section>
   <footer class="site"><span>benchlet</span><a href="https://github.com/ernestolee13/benchlet" target="_blank" rel="noopener">도구 리포</a><a href="https://github.com/ernestolee13/benchlet-benches" target="_blank" rel="noopener">벤치 리포</a><a href="llms.txt">llms.txt</a><span>MIT</span></footer>`;
   bindCards();
 }
@@ -607,7 +607,7 @@ function detail(name) {
     <dt>결정 규칙</dt><dd>${ex.protocol ? esc(ex.protocol.decision_rule) : '-'}</dd></dl>
   ${Object.keys(ex.arms || {}).length ? `<div class="tbl"><table><thead><tr><th>이름</th><th>모델</th><th>provider</th><th>패밀리</th><th>모드</th><th>엔드포인트</th><th>스모크</th></tr></thead><tbody>
   ${Object.entries(ex.arms).map(([a, m]) => `<tr><td>${esc(a)}</td><td><code>${esc(m.model)}</code></td><td>${esc(m.provider || '-')}</td><td>${esc(m.family || '-')}</td><td>${esc(m.mode)} / ${esc(m.prob_source)}</td><td>${esc(m.base_url || '-')}</td><td>${m.smoke ? `${m.smoke.usable ? '사용 가능' : '못 씀'} · 편차 ${m.smoke.spread == null ? '-' : m.smoke.spread.toFixed(3)} · 확률값 ${m.smoke.distinct_p ?? '-'}종 · 5건 ${m.smoke.smoke_acc ?? '-'}` : '기록 없음'}</td></tr>`).join('')}</tbody></table></div>` : ''}`
-  : '<div class="note"><span class="chip pending">기본 모델 실행 대기</span> 결과가 아직 없다. 게시된 벤치는 레지스트리가 기본 모델 넷을 한 번 돌려 결과를 붙인다.</div>'}
+  : '<div class="note"><span class="chip pending">레지스트리 실행 대기</span> 결과가 아직 없다. 게시된 벤치는 레지스트리가 예시 모델 넷을 한 번 돌려 결과를 붙인다.</div>'}
   ${b.source_results ? `<h2>원천 리더보드 모델의 이 ${b.n}건 정확도 <span class="meta">참고</span></h2>
   <p class="meta">${esc(b.source_results.source)}. ${esc(b.source_results.note)} 모델 ${b.source_results.n_models}개 중 프런티어 계열 ${b.source_results.n_frontier}개. 「전체」는 원천 벤치 전체 항목에서의 정확도이고 「이 벤치」는 그중 여기 고른 항목만의 정확도다.</p>
   <div class="tbl srcres"><table><thead><tr><th>모델</th><th class="num">이 벤치</th><th class="num">전체</th></tr></thead><tbody>
@@ -635,10 +635,10 @@ function recommend() {
   ${Object.entries(groups).map(([k, g]) => { const rows = Object.entries(g.arms).map(([a, v]) => [a, v.accs.reduce((p, c, i) => p + c * v.ws[i], 0) / v.ws.reduce((p, c) => p + c, 0), v.accs.length, v.model, v.ps, v.provider]).sort((x, y) => y[1] - x[1]);
     return `<h2>${esc(k)} <span class="meta">벤치 ${g.benches.length}개: ${g.benches.map(n => `<a href="#b-${esc(n)}">${esc(n)}</a>`).join(', ')}</span></h2><div class="tbl"><table><thead><tr><th>이름</th><th>모델</th><th>provider</th><th>prob_source</th><th class="num">평균 정확도</th><th class="num">근거 수</th></tr></thead><tbody>
     ${rows.map(r => `<tr><td>${esc(r[0])}</td><td><code>${esc(r[3] || '')}</code></td><td>${esc(r[5] || '-')}</td><td>${esc(r[4] || '')}</td><td class="num">${pct(r[1])}</td><td class="num">${r[2]}</td></tr>`).join('')}</tbody></table></div>`; }).join('') || '<p class="meta">결과가 붙은 벤치가 없다.</p>'}
-  <h2>기본 모델과 확인된 로그확률 조합 (OpenRouter, ${esc(D.verified.verified_at || '')})</h2><p class="meta">지정하지 않으면 이 넷을 쓴다. 로그프롭을 주는 OpenAI 호환 엔드포인트면 어떤 모델이든 <code>benchlet run --arms custom:&lt;모델&gt;</code> 에 <code>BENCHLET_BASE_URL</code>, <code>BENCHLET_API_KEY</code> 로 돌릴 수 있고, 스모크가 로그프롭·재현성·라벨 질량을 먼저 확인한다.</p>
+  <h2>예시 모델과 확인된 로그확률 조합 (OpenRouter, ${esc(D.verified.verified_at || '')})</h2><p class="meta">확정된 기본값은 없다. 지금 갤러리 결과에 쓴 예시가 이 넷이고, 입력이 싼 프런티어 모델이나 20~30B 급 모델, Jev 류 판단 전용 모델이면 무엇이든 바꿔 쓸 수 있다. 로그프롭을 주는 OpenAI 호환 엔드포인트면 어떤 모델이든 <code>benchlet run --arms custom:&lt;모델&gt;</code> 에 <code>BENCHLET_BASE_URL</code>, <code>BENCHLET_API_KEY</code> 로 돌릴 수 있고, 스모크가 로그프롭·재현성·라벨 질량을 먼저 확인한다.</p>
   <div class="tbl"><table><thead><tr><th>모델</th><th>provider</th><th class="num">$/M 입력</th><th>패밀리</th><th>비고</th></tr></thead><tbody>
   ${(D.verified.verified_working || []).map(v => `<tr><td><code>${esc(v.model)}</code></td><td>${esc(v.provider)}</td><td class="num">${v.in_per_m}</td><td>${esc(v.family)}</td><td>${esc(v.note || '')}</td></tr>`).join('')}</tbody></table></div>
-  <p class="meta">운영자가 직접 확인한 조합은 이 넷뿐이다. 다른 엔드포인트와 모델은 「내 벤치 만들기」의 실행 요건 8개를 사용자의 에이전트가 확인한다.</p>`;
+  <p class="meta">운영자가 직접 확인한 조합은 이 넷뿐이다. 새 모델은 스모크로 확인하고 쓰면 된다. 다른 엔드포인트와 모델은 「내 벤치 만들기」의 실행 요건 8개를 사용자의 에이전트가 확인한다.</p>`;
 }
 function md(s) {
   const lines = s.split('\n'); let out = '', inCode = false, inList = false, inTable = false;
