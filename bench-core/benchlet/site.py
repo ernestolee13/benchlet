@@ -180,7 +180,8 @@ def _en_page(data: dict) -> str:
     if ex:
         for a, st in sorted((ex.get("result_summary") or {}).items(), key=lambda kv: -(kv[1].get("acc") or 0)):
             if st.get("acc") is not None:
-                rows.append((((ex.get("arms_meta") or {}).get(a) or {}).get("model") or a, st["acc"]))
+                meta = ((ex.get("experiment") or {}).get("arms") or {}).get(a) or ((ex.get("arms_meta") or {}).get(a) or {})
+                rows.append((meta.get("model") or a, st["acc"]))
     bars = "".join(f'<span>{_esc(m)}</span><div class="bar"><i style="width:{round(acc*100)}%"></i></div><span>{acc*100:.1f}%</span>' for m, acc in rows)
     graph = {"@context": "https://schema.org", "@graph": [
         {"@type": "WebPage", "@id": SITE_URL + "/en#page", "url": SITE_URL + "/en", "name": "benchlet: judgment mini-benchmarks from your own data", "inLanguage": "en", "description": EN_DESCRIPTION, "isPartOf": {"@id": SITE_URL + "#site"}},
