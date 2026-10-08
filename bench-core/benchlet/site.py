@@ -388,6 +388,9 @@ a.star{font-family:var(--mono);font-size:.78rem;border:1px solid var(--line);bor
 .journey .jb h3{margin:5px 0 4px;font-size:1.02rem}.journey .jb p{margin:0;color:var(--muted);max-width:68ch}
 .journey li.next .jn{background:var(--surface);color:var(--accent);border:2px dashed var(--accent)}
 .journey li.next::before{background:repeating-linear-gradient(to bottom,var(--line) 0 4px,transparent 4px 8px)}
+.feat{display:grid;grid-template-columns:max-content 1fr;gap:10px 22px;margin:8px 0 0;font-size:.95rem}
+.feat dt{font-weight:600;color:var(--fg);padding-top:1px}.feat dd{margin:0;color:var(--muted);max-width:72ch}
+@media (max-width:640px){.feat{grid-template-columns:1fr;gap:2px}.feat dd{margin-bottom:10px}}
 .stats{display:flex;gap:34px;flex-wrap:wrap;margin:6px 0 14px}.stats div{min-width:0}.stats b{display:block;font-size:1.7rem;line-height:1.1;font-variant-numeric:tabular-nums}.stats span{color:var(--muted);font-size:.86rem}
 .sec{margin-top:40px}.sec h2{font-size:1.35rem;margin:0 0 6px}.sec .sub{color:var(--muted);margin:0 0 14px;max-width:70ch}
 footer.site{margin-top:48px;border-top:1px solid var(--line);padding-top:16px;color:var(--muted);font-size:.86rem;display:flex;gap:18px;flex-wrap:wrap}
@@ -493,9 +496,18 @@ benchlet run --bench my-norm --arms glm,qwen,jev</pre></div>
       <li><div class="jn">1</div><div class="jb"><h3>구경한다</h3><p>갤러리의 벤치는 전부 누군가의 실제 작업 판정이다. 질문, 선택지, 클래스 표, 어느 모델이 맞았는지가 그대로 보인다.</p></div></li>
       <li><div class="jn">2</div><div class="jb"><h3>비슷한 벤치를 포크해 내 데이터로 채운다</h3><p>스킬이 새 벤치를 만들기 전에 갤러리에서 비슷한 벤치를 찾아 「포크할까」를 묻는다. 질문과 선택지, 클래스 표를 가져오고 항목만 내 데이터로 채운다. 계보가 남는다.</p></div></li>
       <li><div class="jn">3</div><div class="jb"><h3>내 리포에 올린다, 가능하면 공개로</h3><p>벤치는 처음부터 공개해도 되는 수준으로 만들어진다. 원자료는 올라가지 않고 생성기와 표본 5건, 결과만 간다. 개인정보 스캔을 통과해야 올라가고, 내 GitHub 리포에 쌓이니 언제든 내릴 수 있다.</p></div></li>
-      <li><div class="jn">4</div><div class="jb"><h3>서로 검증한다</h3><p>남의 벤치에 새 모델을 돌려 <code>benchlet submit</code> 으로 제출하면 내 리포의 community 폴더에 쌓이고 갤러리가 모은다. 같은 판본(항목 해시 동일)에 서로 다른 제출자 3명의 결과가 5pp 안에 모이면 「검증됨」 배지가 붙고 중앙값이 공식 점수가 된다. 작성자 본인 제출은 세지 않는다. 한 사람의 결과는 그때까지 「제출 1건」으로만 보인다. 운영자도 기본 모델 넷으로 다시 돌려 「레지스트리 실행」 배지로 붙인다.</p></div></li>
-      <li class="next"><div class="jn">5</div><div class="jb"><h3>앞으로: 올린 벤치를 주요 모델로 우리가 돌린다</h3><p>운영자에게 여유 크레딧이 생기거나 지원 프로그램에 선정되면, 사용자가 올린 벤치를 주요 모델들로 돌려 결과를 붙일 계획이다. 지금은 기본 모델 넷을 한 번 돌려 붙인다.</p></div></li>
+      <li class="next"><div class="jn">4</div><div class="jb"><h3>앞으로: 올린 벤치를 주요 모델로 우리가 돌린다</h3><p>운영자에게 여유 크레딧이 생기거나 지원 프로그램에 선정되면, 사용자가 올린 벤치를 주요 모델들로 돌려 결과를 붙일 계획이다. 지금은 기본 모델 넷을 한 번 돌려 붙인다.</p></div></li>
     </ol></section>
+  <section class="sec"><h2>이 서비스의 특징</h2>
+    <dl class="feat">
+      <dt>서로 검증</dt><dd>남의 벤치에 새 모델을 돌려 <code>benchlet submit</code> 으로 제출하면 내 리포의 community 폴더에 쌓이고 갤러리가 모은다. 같은 판본에 서로 다른 제출자 3명의 결과가 5pp 안에 모이면 「검증됨」 배지와 중앙값 공식 점수. 작성자 본인 제출은 세지 않고, 그 전까지는 「제출 n건」으로만 보인다.</dd>
+      <dt>운영자 재실행</dt><dd>결과 없는 벤치는 레지스트리가 기본 모델 넷을 한 번 돌려 「레지스트리 실행」 배지로 붙인다. 새 모델이 나오면 그 모델만 덧붙여 돌릴 수 있다.</dd>
+      <dt>모델과 엔드포인트는 자유</dt><dd>첫 토큰 로그프롭을 주는 OpenAI 호환 엔드포인트면 어떤 모델이든 <code>custom:&lt;모델&gt;</code> 로 돌린다. 지정하지 않으면 기본 넷(glm-4.7-flash, qwen3.8-27b, deepseek-v4-flash, jev-1.13). 스모크가 로그프롭·재현성·라벨 질량을 먼저 확인한다.</dd>
+      <dt>작성자가 곧 신원</dt><dd>벤치는 작성자의 GitHub 리포에 쌓이고 카드에 작성자가 보인다. 신뢰 점수는 커뮤니티 검증, 검수, 축약 검증, 작성자의 팔로워와 리포 스타를 더한 값이고 내역이 카드에 보인다.</dd>
+      <dt>실행 없이 게시</dt><dd>키가 없어도 올릴 수 있다. 원자료는 올라가지 않고 생성기와 표본 5건, 결과만 간다. 개인정보 스캔을 통과해야 올라간다.</dd>
+      <dt>공개 벤치 축약 시드</dt><dd>BFCL, JudgeBench, RewardBench 2, HELM 에서 모델별 항목 정오를 받아 100건으로 줄인 시드. 원천 모델 수십~수백 개(GPT-5.1, Claude 4.5, Gemini 3 Pro 포함)의 이 100건 정확도가 상세에 같이 보인다.</dd>
+      <dt>실험 방식이 그대로 보인다</dt><dd>상세 페이지에 정확한 모델 슬러그, provider, 호출 템플릿, 극성 반전과 셔플, 결정 규칙, 스모크 결과가 적힌다. 결정 규칙은 이진 0.5, 다지 argmax 하나다.</dd>
+    </dl></section>
   <section class="sec"><h2>다른 흐름</h2>
     <div class="usecases">
       <div class="uc"><div class="who">고객센터 팀</div><h3>문의 라우팅에 싼 모델을 써도 되나</h3><p>티켓 30건을 결제, 버그, 계정, 일반으로 나눈 벤치. 작은 모델도 96~100 이라 바꿔도 된다는 근거가 생겼다.</p><p class="meta">${link('support-ticket-triage')}, ${link('support-escalation-route')}</p></div>
