@@ -57,6 +57,16 @@ bench-core/bin/benchlet publish  --bench benches/example --github   # 내 GitHub
 
 읽는 법. 이 판정은 Jev 와 DeepSeek 이 맞고, 가장 싼 두 모델은 60% 근처라 쓰면 안 된다. 새 모델이 나오면 같은 벤치를 다시 돌려 그 자리에 맞는지 본다. 격차가 15pp 보다 작으면 100건으로는 못 가른다. 갤러리의 「유형별 추천」은 같은 유형의 벤치 결과를 모아 「이 유형엔 이 모델」을 근거 수와 함께 낸다.
 
+## Claude Code 밖에서
+
+Claude Code 플러그인은 포장일 뿐이다. 속은 셋이고 어느 것이든 따로 쓴다.
+
+- **CLI** `bench-core/bin/benchlet`: 셸이 있는 곳 어디든. Python 3.9 이상, pyyaml 하나.
+- **MCP 서버** `python3 -m benchlet.cli mcp`: 표준 입출력 JSON-RPC, 의존성 없음. Codex CLI, Cursor, Windsurf, Gemini CLI, 자체 에이전트에 한 줄로 붙는다.
+- **스킬** `skills/minibench-author/`: 마크다운 지시문이라 다른 에이전트의 시스템 프롬프트나 AGENTS.md 에 그대로 넣는다.
+
+등록 예시와 흐름은 `docs/USE_OUTSIDE_CLAUDE_CODE.md`.
+
 ## 어떻게 돌아가나
 
 ![흐름: 만들기, 검수, 게시, 읽기](docs/img/muse-flow.png)
