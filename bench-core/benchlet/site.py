@@ -81,6 +81,23 @@ def _load_registry(root: Path) -> list:
     return out
 
 
+def _model_counts(benches: list) -> dict:
+    """갤러리에 등장한 서로 다른 모델 수. 직접 돌린 모델(arms_meta), 커뮤니티 제출 모델, 축약 시드의 원천 리더보드 모델을 합친다(이름 소문자 기준 중복 제거)."""
+    def norm(x):
+        return str(x or "").strip().lower()
+    run, src, comm = set(), set(), set()
+    for b in benches:
+        for a in (b.get("arms_meta") or {}).values():
+            if isinstance(a, dict) and a.get("model"):
+                run.add(norm(a["model"]))
+        for k, v in ((b.get("community") or {}).get("models") or {}).items():
+            comm.add(norm((v or {}).get("model") or k))
+        for m in ((b.get("source_results") or {}).get("models") or []):
+            src.add(norm(m.get("model")))
+    run.discard(""); src.discard(""); comm.discard("")
+    return {"run": len(run), "community": len(comm), "source": len(src), "total": len(run | src | comm)}
+
+
 def _gh_json(path: str) -> dict | None:
     """gh CLI 로 GitHub API 를 읽는다. gh 가 없거나 실패하면 None (빌드는 계속)."""
     import shutil, subprocess
@@ -138,6 +155,7 @@ def build_site(root: Path, out_dir: Path) -> Path:
     benches = _load_registry(root)
     from .taxonomy import load as _tload
     data = {"benches": benches, "owners": _owners(root), "guide": _guide(root), "recall": _recall_summary(root), "taxonomy": _tload(root),
+            "models": _model_counts(benches),
             "verified": json.loads((root / "results" / "or_verified.json").read_text(encoding="utf-8")) if (root / "results" / "or_verified.json").exists() else {}}
     out_dir.mkdir(parents=True, exist_ok=True)
     img_src = root / "docs" / "img"
@@ -475,7 +493,7 @@ function home() {
     <div><p class="eyebrow">판단 로직을 위한 나만의 작업 벤치</p><h1 class="big">이 판정엔 어느 모델이 맞나.<br>내 데이터 100건으로 잰다</h1>
     <p class="lead big">승인 게이트, 분류, 라우팅, 도구 호출 같은 판단 지점에서 40~100건을 뽑아 일반 LLM 과 Jev 같은 판단 전용 모델을 같은 조건으로 비교한다. 내 데이터로 만든 벤치라 어떤 모델도 외우지 못한다. 남들이 올린 작업 벤치를 구경하고, 그걸 참조해 내 것을 만든다.</p>
     <div class="cta"><a class="btn primary" href="#guide">내 벤치 만들기</a><a class="btn" href="#gallery">갤러리 ${D.benches.length}개 보기</a></div>
-    <div class="stats"><div><b>${D.benches.length}</b><span>벤치</span></div><div><b>${nItems.toLocaleString()}</b><span>항목</span></div><div><b>4</b><span>예시 모델 (바꿔도 된다)</span></div><div><b>1¢</b><span>100건을 모델 넷에 돌리는 비용</span></div></div></div>
+    <div class="stats"><div><b>${D.benches.length}</b><span>벤치</span></div><div><b>${nItems.toLocaleString()}</b><span>항목</span></div><div><b>${(D.models||{}).total || 0}</b><span>모델 (직접 돌린 ${(D.models||{}).run || 0} + 원천 리더보드 ${(D.models||{}).source || 0})</span></div><div><b>1¢</b><span>100건을 모델 넷에 돌리는 비용</span></div></div></div>
     <div class="heroimg"><img src="img/muse-hero.png" alt="인덱스 카드로 만든 작은 측정 도구와 두 응답을 재는 저울" width="1920" height="1280"></div></section>
   <section class="sec"><h2>세 단계</h2><p class="sub">돌리지 않아도 올릴 수 있다. 올리면 레지스트리가 모델 넷을 한 번 돌려 결과를 붙인다. 모델은 정해져 있지 않다. 첫 토큰 로그프롭을 주는 OpenAI 호환 엔드포인트면 어떤 모델이든 <code>custom:&lt;모델&gt;</code> 로 돌린다.</p>
     <div class="steps">
