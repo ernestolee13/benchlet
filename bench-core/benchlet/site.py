@@ -388,6 +388,8 @@ a.star{font-family:var(--mono);font-size:.78rem;border:1px solid var(--line);bor
 .journey .jb h3{margin:5px 0 4px;font-size:1.02rem}.journey .jb p{margin:0;color:var(--muted);max-width:68ch}
 .journey li.next .jn{background:var(--surface);color:var(--accent);border:2px dashed var(--accent)}
 .journey li.next::before{background:repeating-linear-gradient(to bottom,var(--line) 0 4px,transparent 4px 8px)}
+.featlist{margin:6px 0 0;padding-left:0;list-style:none;display:grid;gap:10px;max-width:72ch}
+.featlist li{position:relative;padding-left:22px;font-size:.98rem}.featlist li::before{content:"";position:absolute;left:0;top:.55em;width:10px;height:10px;border-radius:50%;background:var(--accent)}
 .feat{display:grid;grid-template-columns:max-content 1fr;gap:10px 22px;margin:8px 0 0;font-size:.95rem}
 .feat dt{font-weight:600;color:var(--fg);padding-top:1px}.feat dd{margin:0;color:var(--muted);max-width:72ch}
 @media (max-width:640px){.feat{grid-template-columns:1fr;gap:2px}.feat dd{margin-bottom:10px}}
@@ -499,15 +501,14 @@ benchlet run --bench my-norm --arms glm,qwen,jev</pre></div>
       <li class="next"><div class="jn">4</div><div class="jb"><h3>앞으로: 올린 벤치를 주요 모델로 우리가 돌린다</h3><p>운영자에게 여유 크레딧이 생기거나 지원 프로그램에 선정되면, 사용자가 올린 벤치를 주요 모델들로 돌려 결과를 붙일 계획이다. 지금은 예시 모델 넷을 한 번 돌려 붙인다.</p></div></li>
     </ol></section>
   <section class="sec"><h2>이 서비스의 특징</h2>
-    <dl class="feat">
-      <dt>서로 검증</dt><dd>남의 벤치에 새 모델을 돌려 <code>benchlet submit</code> 으로 제출하면 내 리포의 community 폴더에 쌓이고 갤러리가 모은다. 같은 판본에 서로 다른 제출자 3명의 결과가 5pp 안에 모이면 「검증됨」 배지와 중앙값 공식 점수. 작성자 본인 제출은 세지 않고, 그 전까지는 「제출 n건」으로만 보인다.</dd>
-      <dt>운영자 재실행</dt><dd>결과 없는 벤치는 레지스트리가 그때의 예시 모델 넷을 한 번 돌려 「레지스트리 실행」 배지로 붙인다. 새 모델이 나오면 그 모델만 덧붙여 돌릴 수 있다.</dd>
-      <dt>모델과 엔드포인트는 자유</dt><dd>첫 토큰 로그프롭을 주는 OpenAI 호환 엔드포인트면 어떤 모델이든 <code>custom:&lt;모델&gt;</code> 로 돌린다. 확정된 기본값은 두지 않는다. 새 모델이 계속 나오니 입력이 싼 프런티어 모델이나 20~30B 급 모델도 Jev 와 비슷한 속도와 점수를 내는 경우가 많고, Jev 류 판단 전용 모델이 따로 있으면 그것도 된다. 지금 갤러리의 예시 넷은 glm-4.7-flash, qwen3.8-27b, deepseek-v4-flash, jev-1.13 이다. 스모크가 로그프롭·재현성·라벨 질량을 먼저 확인한다.</dd>
-      <dt>작성자가 곧 신원</dt><dd>벤치는 작성자의 GitHub 리포에 쌓이고 카드에 작성자가 보인다. 신뢰 점수는 커뮤니티 검증, 검수, 축약 검증, 작성자의 팔로워와 리포 스타를 더한 값이고 내역이 카드에 보인다.</dd>
-      <dt>실행 없이 게시</dt><dd>키가 없어도 올릴 수 있다. 원자료는 올라가지 않고 생성기와 표본 5건, 결과만 간다. 개인정보 스캔을 통과해야 올라간다.</dd>
-      <dt>공개 벤치 축약 시드</dt><dd>BFCL, JudgeBench, RewardBench 2, HELM 에서 모델별 항목 정오를 받아 100건으로 줄인 시드. 원천 모델 수십~수백 개(GPT-5.1, Claude 4.5, Gemini 3 Pro 포함)의 이 100건 정확도가 상세에 같이 보인다.</dd>
-      <dt>실험 방식이 그대로 보인다</dt><dd>상세 페이지에 정확한 모델 슬러그, provider, 호출 템플릿, 극성 반전과 셔플, 결정 규칙, 스모크 결과가 적힌다. 결정 규칙은 이진 0.5, 다지 argmax 하나다.</dd>
-    </dl></section>
+    <ul class="featlist">
+      <li>쓸모 있어 보이는 벤치는 참고만 하는 게 아니라, 내가 새 모델을 돌려 점수를 보태 줄 수 있습니다.</li>
+      <li>서로 다른 세 사람의 점수가 5pp 안에 모이면 「검증됨」이 붙고 중앙값이 공식 점수가 됩니다. 작성자 본인 점수는 세지 않습니다.</li>
+      <li>공개해 두면 운영자가 예산이 허락하는 한도에서 대표 모델 몇 가지로 돌려 점수를 올려 줍니다.</li>
+      <li>모델은 정해져 있지 않습니다. 로그프롭을 주는 모델이면 입력이 싼 프런티어 모델, 20~30B 급, Jev 류 판단 전용 모델 무엇이든 됩니다.</li>
+      <li>벤치는 작성자의 GitHub 리포에 쌓이고, 작성자와 실험 방식(모델 슬러그, 호출 템플릿, 결정 규칙)이 그대로 보입니다.</li>
+      <li>공개 벤치 축약 시드에는 GPT-5.1, Claude 4.5, Gemini 3 Pro 를 포함한 원천 모델 수십~수백 개의 점수가 같이 붙어 있습니다.</li>
+    </ul></section>
   <section class="sec"><h2>다른 흐름</h2>
     <div class="usecases">
       <div class="uc"><div class="who">고객센터 팀</div><h3>문의 라우팅에 싼 모델을 써도 되나</h3><p>티켓 30건을 결제, 버그, 계정, 일반으로 나눈 벤치. 작은 모델도 96~100 이라 바꿔도 된다는 근거가 생겼다.</p><p class="meta">${link('support-ticket-triage')}, ${link('support-escalation-route')}</p></div>
