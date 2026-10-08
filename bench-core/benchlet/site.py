@@ -380,6 +380,14 @@ a.star{font-family:var(--mono);font-size:.78rem;border:1px solid var(--line);bor
 .eyebrow{color:var(--accent);font-weight:600;letter-spacing:.04em;margin:0 0 8px;font-size:.9rem}
 .example{display:grid;grid-template-columns:1.1fr 1fr;gap:24px;align-items:center}@media (max-width:760px){.example{grid-template-columns:1fr}}
 .example .bars{font-size:.86rem;margin:12px 0}
+.journey{list-style:none;margin:6px 0 0;padding:0;position:relative}
+.journey li{display:grid;grid-template-columns:34px 1fr;gap:14px;position:relative;padding-bottom:22px}
+.journey li::before{content:"";position:absolute;left:16px;top:34px;bottom:0;width:2px;background:var(--line)}
+.journey li:last-child::before{display:none}
+.journey .jn{width:34px;height:34px;border-radius:50%;background:var(--accent);color:#fff;font-weight:600;display:flex;align-items:center;justify-content:center;font-variant-numeric:tabular-nums}
+.journey .jb h3{margin:5px 0 4px;font-size:1.02rem}.journey .jb p{margin:0;color:var(--muted);max-width:68ch}
+.journey li.next .jn{background:var(--surface);color:var(--accent);border:2px dashed var(--accent)}
+.journey li.next::before{background:repeating-linear-gradient(to bottom,var(--line) 0 4px,transparent 4px 8px)}
 .stats{display:flex;gap:34px;flex-wrap:wrap;margin:6px 0 14px}.stats div{min-width:0}.stats b{display:block;font-size:1.7rem;line-height:1.1;font-variant-numeric:tabular-nums}.stats span{color:var(--muted);font-size:.86rem}
 .sec{margin-top:40px}.sec h2{font-size:1.35rem;margin:0 0 6px}.sec .sub{color:var(--muted);margin:0 0 14px;max-width:70ch}
 footer.site{margin-top:48px;border-top:1px solid var(--line);padding-top:16px;color:var(--muted);font-size:.86rem;display:flex;gap:18px;flex-wrap:wrap}
@@ -480,13 +488,13 @@ benchlet run --bench my-norm --arms glm,qwen,jev</pre></div>
       <p class="sub">읽는 법. 이 판정은 Jev 와 DeepSeek 이 맞고, 가장 싼 두 모델은 60% 근처라 쓰면 안 된다. 같은 벤치를 새 모델이 나올 때 다시 돌리면 그 모델이 이 자리에 맞는지 바로 보인다. 격차가 15pp 보다 작으면 100건으로는 못 가른다.</p>
       <p><a class="btn" href="#b-${esc(ex.name)}">이 벤치 상세</a> <a class="btn" href="#recommend">유형별로 어느 모델이 맞나</a></p></div>
       <div class="flowimg"><img src="img/muse-flow.png" alt="컨베이어 위의 네 정거장: 코드 읽기, 검수 도장, 게시, 모델 비교" width="1920" height="1280"></div></div></section>` : ''}
-  <section class="sec"><h2>구경하고, 참조하고, 올린다</h2>
-    <div class="usecases">
-      <div class="uc"><div class="who">구경</div><h3>남들은 어떤 판정을 재나</h3><p>갤러리의 벤치는 전부 누군가의 실제 작업 판정이다. 질문, 선택지, 클래스 표, 어느 모델이 맞았는지가 그대로 보인다.</p></div>
-      <div class="uc"><div class="who">참조</div><h3>비슷한 벤치를 포크해 내 데이터로</h3><p>스킬이 먼저 갤러리에서 비슷한 벤치를 찾아 「포크할까」를 묻는다. 질문과 선택지, 클래스 표를 가져오고 항목만 내 데이터로 채운다. 계보가 남는다.</p></div>
-      <div class="uc"><div class="who">공개</div><h3>올려도 부담이 없다</h3><p>벤치는 처음부터 공개해도 되는 수준으로 만들어진다. 원자료는 올라가지 않고 생성기와 표본 5건, 결과만 간다. 개인정보 스캔을 통과해야 올라가고, 내 GitHub 리포에 쌓이니 언제든 내릴 수 있다. 가능하면 공개로 올려 달라.</p></div>
-    </div>
-    <p class="meta">앞으로 할 일. 운영자에게 여유 크레딧이 생기거나 지원 프로그램에 선정되면, 사용자가 올린 벤치를 주요 모델들로 우리가 돌려 결과를 붙이는 쪽으로 구상하고 있다. 지금은 기준 모델 넷을 한 번 돌려 붙인다.</p></section>
+  <section class="sec"><h2>구경하고, 참조하고, 올린다</h2><p class="sub">갤러리는 이 순서로 쓰게 돼 있다.</p>
+    <ol class="journey">
+      <li><div class="jn">1</div><div class="jb"><h3>구경한다</h3><p>갤러리의 벤치는 전부 누군가의 실제 작업 판정이다. 질문, 선택지, 클래스 표, 어느 모델이 맞았는지가 그대로 보인다.</p></div></li>
+      <li><div class="jn">2</div><div class="jb"><h3>비슷한 벤치를 포크해 내 데이터로 채운다</h3><p>스킬이 새 벤치를 만들기 전에 갤러리에서 비슷한 벤치를 찾아 「포크할까」를 묻는다. 질문과 선택지, 클래스 표를 가져오고 항목만 내 데이터로 채운다. 계보가 남는다.</p></div></li>
+      <li><div class="jn">3</div><div class="jb"><h3>내 리포에 올린다, 가능하면 공개로</h3><p>벤치는 처음부터 공개해도 되는 수준으로 만들어진다. 원자료는 올라가지 않고 생성기와 표본 5건, 결과만 간다. 개인정보 스캔을 통과해야 올라가고, 내 GitHub 리포에 쌓이니 언제든 내릴 수 있다.</p></div></li>
+      <li class="next"><div class="jn">4</div><div class="jb"><h3>앞으로: 올린 벤치를 주요 모델로 우리가 돌린다</h3><p>운영자에게 여유 크레딧이 생기거나 지원 프로그램에 선정되면, 사용자가 올린 벤치를 주요 모델들로 돌려 결과를 붙일 계획이다. 지금은 기준 모델 넷을 한 번 돌려 붙인다.</p></div></li>
+    </ol></section>
   <section class="sec"><h2>다른 흐름</h2>
     <div class="usecases">
       <div class="uc"><div class="who">고객센터 팀</div><h3>문의 라우팅에 싼 모델을 써도 되나</h3><p>티켓 30건을 결제, 버그, 계정, 일반으로 나눈 벤치. 작은 모델도 96~100 이라 바꿔도 된다는 근거가 생겼다.</p><p class="meta">${link('support-ticket-triage')}, ${link('support-escalation-route')}</p></div>
