@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import datetime as dt
 import json
+import os as _os
 import re
 import math
 from collections import defaultdict
@@ -21,6 +22,8 @@ def _load_registry(root: Path) -> list:
     out = []
     for mp in sorted((root / "registry" / "benches").glob("*/*/manifest.yaml")):
         m = yaml.safe_load(mp.read_text(encoding="utf-8")) or {}
+        if m.get("status") in ("superseded", "example") and not _os.environ.get("BENCHLET_SHOW_ALL"):
+            continue                      # 대체된 판본과 예제는 갤러리 목록·집계에서 뺀다 (리포에는 남는다)
         d = mp.parent
         samples = []
         sp = d / "samples.jsonl"
@@ -77,7 +80,7 @@ def _load_registry(root: Path) -> list:
                     "result_summary": rs, "per_class": per_class, "arms_meta": arms_meta, "review": m.get("review") or {},
                     "generator": m.get("generator") or {}, "source": m.get("source") or "", "license": m.get("license"),
                     "samples": samples, "path": str(d.relative_to(root)), "items_sha256": m.get("items_sha256"),
-                    "forked_from": m.get("forked_from"), "source_results": m.get("source_results")})
+                    "forked_from": m.get("forked_from"), "source_results": m.get("source_results"), "caveats": m.get("caveats") or [], "status": m.get("status")})
     return out
 
 
@@ -267,7 +270,6 @@ def build_site(root: Path, out_dir: Path) -> Path:
     return out_dir / "index.html"
 
 
-import os as _os
 
 
 def _site_cfg() -> dict:
@@ -718,6 +720,7 @@ function detail(name) {
   <p class="meta">${esc(b.source_results.source)}. ${esc(b.source_results.note)} 모델 ${b.source_results.n_models}개 중 프런티어 계열 ${b.source_results.n_frontier}개. 「전체」는 원천 벤치 전체 항목에서의 정확도이고 「이 벤치」는 그중 여기 고른 항목만의 정확도다.</p>
   <div class="tbl srcres"><table><thead><tr><th>모델</th><th class="num">이 벤치</th><th class="num">전체</th></tr></thead><tbody>
   ${b.source_results.models.map(m => `<tr class="${m.frontier ? 'frontier' : ''}"><td><code>${esc(m.model)}</code></td><td class="num">${pct(m.acc_subset)}</td><td class="num">${pct(m.acc_full)}</td></tr>`).join('')}</tbody></table></div>` : ''}
+  ${(b.caveats || []).length ? `<h2>알려진 약점</h2><ul>${b.caveats.map(c => `<li>${esc(c)}</li>`).join('')}</ul>` : ''}
   <h2>커뮤니티 점수</h2>
   <p class="meta">다른 사람이 같은 판본(해시 동일)에 새 모델을 돌려 제출한 결과. 제출자가 서로 다른 3건 이상이 5pp 안에 모이면 「검증됨」이고 공식 점수는 중앙값이다. 작성자 본인 제출은 세지 않는다. 제출: <code>benchlet submit --bench ${esc(b.name)} --results results/${esc(b.name)}-run.json --github</code></p>
   ${Object.keys((b.community || {}).models || {}).length ? `<div class="tbl"><table><thead><tr><th>모델</th><th>provider</th><th class="num">중앙값</th><th class="num">범위</th><th class="num">제출</th><th>상태</th></tr></thead><tbody>
