@@ -169,6 +169,7 @@ def _recall_summary(root: Path) -> str:
 
 EN_DESCRIPTION = ("Small judgment benchmarks built from your own data. Pull 40 to 100 items from an approval gate, classifier, router or tool-call decision, "
                   "run general LLMs and judgment-only models like Jev under identical conditions, and see which model fits that decision. Shared through the author's own GitHub repo.")
+EN_META = "Judgment mini-benchmarks from your own data: 40 to 100 items, cheap models and Jev-like judges compared under identical conditions, shared via your GitHub repo."
 
 
 def _en_page(data: dict) -> str:
@@ -184,15 +185,19 @@ def _en_page(data: dict) -> str:
                 rows.append((meta.get("model") or a, st["acc"]))
     bars = "".join(f'<span>{_esc(m)}</span><div class="bar"><i style="width:{round(acc*100)}%"></i></div><span>{acc*100:.1f}%</span>' for m, acc in rows)
     graph = {"@context": "https://schema.org", "@graph": [
+        {"@type": "Organization", "@id": SITE_URL + "#org", "name": SITE_NAME, "url": SITE_URL, "description": EN_META, "sameAs": ["https://github.com/ernestolee13"]},
+        {"@type": "WebSite", "@id": SITE_URL + "#site", "name": SITE_NAME, "url": SITE_URL, "inLanguage": ["ko", "en"], "publisher": {"@id": SITE_URL + "#org"}},
         {"@type": "WebPage", "@id": SITE_URL + "/en#page", "url": SITE_URL + "/en", "name": "benchlet: judgment mini-benchmarks from your own data", "inLanguage": "en", "description": EN_DESCRIPTION, "isPartOf": {"@id": SITE_URL + "#site"}},
         {"@type": "FAQPage", "mainEntity": [
             {"@type": "Question", "name": "What is a judgment mini-benchmark?", "acceptedAnswer": {"@type": "Answer", "text": "40 to 100 binary or multiple-choice items pulled from a decision point in your own code: approval gates, rule checks, routers, tool-call gates, grounding checks. It asks for a judgment, not for knowledge."}},
             {"@type": "Question", "name": "Do I need to run models to publish?", "acceptedAnswer": {"@type": "Answer", "text": "No. Publish without a key and the registry runs a few example models once. To run yourself, any OpenAI-compatible endpoint that returns first-token logprobs works."}},
             {"@type": "Question", "name": "Which models are used?", "acceptedAnswer": {"@type": "Answer", "text": "None are fixed. Cheap-input frontier models, 20 to 30B models and Jev-like judgment models all work. The gallery currently shows results from glm-4.7-flash, qwen3.8-27b, deepseek-v4-flash and jev-1.13, plus source leaderboard scores on distilled seeds."}}]}]}
-    head = (f'<title>benchlet | judgment mini-benchmarks from your own data</title>\n<meta name="description" content="{_esc(EN_DESCRIPTION)}">\n'
+    ver = "".join([*([f'<meta name="google-site-verification" content="{_esc(SITE_CFG["google_site_verification"])}">\n'] if SITE_CFG.get("google_site_verification") else []),
+                   *([f'<meta name="naver-site-verification" content="{_esc(SITE_CFG["naver_site_verification"])}">\n'] if SITE_CFG.get("naver_site_verification") else [])])
+    head = (ver + f'<title>benchlet | judgment mini-benchmarks from your own data</title>\n<meta name="description" content="{_esc(EN_META)}">\n'
             f'<link rel="canonical" href="{SITE_URL}/en">\n<link rel="alternate" hreflang="en" href="{SITE_URL}/en">\n<link rel="alternate" hreflang="ko" href="{SITE_URL}/">\n<link rel="alternate" hreflang="x-default" href="{SITE_URL}/">\n'
-            f'<meta property="og:type" content="website"><meta property="og:url" content="{SITE_URL}/en"><meta property="og:site_name" content="benchlet"><meta property="og:title" content="benchlet | judgment mini-benchmarks from your own data"><meta property="og:description" content="{_esc(EN_DESCRIPTION)}"><meta property="og:image" content="{SITE_URL}/og-image.png"><meta property="og:locale" content="en_US">\n'
-            f'<meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="benchlet"><meta name="twitter:description" content="{_esc(EN_DESCRIPTION)}"><meta name="twitter:image" content="{SITE_URL}/og-image.png">\n'
+            f'<meta property="og:type" content="website"><meta property="og:url" content="{SITE_URL}/en"><meta property="og:site_name" content="benchlet"><meta property="og:title" content="benchlet | judgment mini-benchmarks from your own data"><meta property="og:description" content="{_esc(EN_META)}"><meta property="og:image" content="{SITE_URL}/og-image.png"><meta property="og:locale" content="en_US">\n'
+            f'<meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="benchlet"><meta name="twitter:description" content="{_esc(EN_META)}"><meta name="twitter:image" content="{SITE_URL}/og-image.png">\n'
             f'<script type="application/ld+json">{json.dumps(graph, ensure_ascii=False)}</script>\n')
     body = f'''<header class="top"><div class="wrap"><a class="brand" href="/en"><img class="logo" src="img/mascot-scale-v2c.png" alt="" width="28" height="28">benchlet <small>your own work benches for judgment logic</small></a><a class="lang" href="/" hreflang="ko" lang="ko">한국어</a></div></header>
 <main class="wrap">
