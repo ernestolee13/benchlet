@@ -1,0 +1,365 @@
+{
+ "task": "derivation-check",
+ "bench": "derivation-check@1",
+ "items_sha256": "e26289949aa5b17ecb0657e617d4f51668baa1d09ade9e45491dba458dc1f381",
+ "template": "legacy-seed",
+ "date": "2026-09-30",
+ "arms": {
+  "glm": {
+   "model": "z-ai/glm-4.7-flash",
+   "provider": "cloudflare",
+   "family": "GLM",
+   "mode": "logprob",
+   "prob_source": "logprob",
+   "base_url": "openrouter.ai",
+   "in_per_m": 0.0605,
+   "smoke": null
+  },
+  "qwen": {
+   "model": "qwen/qwen3.8-27b",
+   "provider": "parasail",
+   "family": "Qwen",
+   "mode": "logprob",
+   "prob_source": "logprob",
+   "base_url": "openrouter.ai",
+   "in_per_m": 0.0605,
+   "smoke": null
+  },
+  "deepseek": {
+   "model": "deepseek/deepseek-v4-flash",
+   "provider": "digitalocean",
+   "family": "DeepSeek",
+   "mode": "logprob",
+   "prob_source": "logprob",
+   "base_url": "openrouter.ai",
+   "in_per_m": 0.14,
+   "smoke": null
+  },
+  "jev": {
+   "model": "typesafe/jev-1.13",
+   "provider": "openrouter",
+   "family": "Jev",
+   "mode": "typed",
+   "prob_source": "typed",
+   "base_url": "openrouter.ai",
+   "in_per_m": 0.042,
+   "smoke": null
+  }
+ },
+ "items": [
+  {
+   "id": "fx2-000",
+   "target": 0,
+   "label": 1,
+   "class": null,
+   "label_source": "constructed",
+   "cluster": "aekyung-chemical-biofuel-cartel-2026-07",
+   "n_options": 2,
+   "arms": {
+    "glm": {
+     "p_violation": 0.6155292951744946,
+     "ms": 839,
+     "cost": 1.96625e-05,
+     "in_tok": 325,
+     "err": null,
+     "mass": [
+      0.9913,
+      0.9874
+     ],
+     "provider": "Cloudflare",
+     "reasoning_tokens": [
+      0,
+      0
+     ]
+    },
+    "qwen": {
+     "p_violation": 0.015604513944753325,
+     "ms": 1054,
+     "cost": 1.5367e-05,
+     "in_tok": 254,
+     "err": null,
+     "mass": [
+      0.9747,
+      0.9929
+     ],
+     "provider": "Parasail",
+     "reasoning_tokens": [
+      0,
+      0
+     ]
+    },
+    "deepseek": {
+     "p_violation": 0.0007096704541319452,
+     "ms": 2477,
+     "cost": 4.046e-05,
+     "in_tok": 289,
+     "err": null,
+     "mass": [
+      0.9986,
+      0.9993
+     ],
+     "provider": "DigitalOcean",
+     "reasoning_tokens": [
+      0,
+      0
+     ]
+    },
+    "jev": {
+     "ms": 1592,
+     "in_tok": 400,
+     "cost": 1.6800000000000002e-05,
+     "model": "typesafe/jev-1.13-20260917",
+     "err": null,
+     "raw": {
+      "type": "noul",
+      "noul": 0.02
+     },
+     "p_violation": 0.02
+    }
+   }
+  },
+  {
+   "id": "fx2-001",
+   "target": 0,
+   "label": 1,
+   "class": null,
+   "label_source": "constructed",
+   "cluster": "busan-savings-bank-park-chairman-verdict-2013-09",
+   "n_options": 2,
+   "arms": {
+    "glm": {
+     "p_violation": 0.6155292951744946,
+     "ms": 12154,
+     "cost": 1.67585e-05,
+     "in_tok": 277,
+     "err": null,
+     "mass": [
+      0.9942,
+      0.9899
+     ],
+     "provider": "Cloudflare",
+     "reasoning_tokens": [
+      0,
+      0
+     ]
+    },
+    "qwen": {
+     "p_violation": 0.20670895644492254,
+     "ms": 951,
+     "cost": 1.4035999999999999e-05,
+     "in_tok": 232,
+     "err": null,
+     "mass": [
+      0.985,
+      0.9877
+     ],
+     "provider": "Parasail",
+     "reasoning_tokens": [
+      0,
+      0
+     ]
+    },
+    "deepseek": {
+     "p_violation": 0.0009890885502169464,
+     "ms": 4029,
+     "cost": 3.5140000000000006e-05,
+     "in_tok": 251,
+     "err": null,
+     "mass": [
+      0.9984,
+      0.9994
+     ],
+     "provider": "DigitalOcean",
+     "reasoning_tokens": [
+      0,
+      0
+     ]
+    },
+    "jev": {
+     "ms": 400,
+     "in_tok": 388,
+     "cost": 1.6296e-05,
+     "model": "typesafe/jev-1.13-20260917",
+     "err": null,
+     "raw": {
+      "type": "noul",
+      "noul": 0.12
+     },
+     "p_violation": 0.12
+    }
+   }
+  },
+  {
+   "id": "fx2-002",
+   "target": 0,
+   "label": 1,
+   "class": null,
+   "label_source": "constructed",
+   "cluster": "dongyang-securities-cp-fraud-2013-09",
+   "n_options": 2,
+   "arms": {
+    "glm": {
+     "p_violation": 0.6587872369855942,
+     "ms": 7978,
+     "cost": 2.1235499999999997e-05,
+     "in_tok": 351,
+     "err": null,
+     "mass": [
+      0.9889,
+      0.9948
+     ],
+     "provider": "Cloudflare",
+     "reasoning_tokens": [
+      0,
+      0
+     ]
+    },
+    "qwen": {
+     "p_violation": 0.02449618481683648,
+     "ms": 1921,
+     "cost": 1.6456e-05,
+     "in_tok": 272,
+     "err": null,
+     "mass": [
+      0.9946,
+      0.9868
+     ],
+     "provider": "Parasail",
+     "reasoning_tokens": [
+      0,
+      0
+     ]
+    },
+    "deepseek": {
+     "p_violation": 0.00039190708217128197,
+     "ms": 1199,
+     "cost": 4.382e-05,
+     "in_tok": 313,
+     "err": null,
+     "mass": [
+      0.9992,
+      0.9975
+     ],
+     "provider": "DigitalOcean",
+     "reasoning_tokens": [
+      0,
+      0
+     ]
+    },
+    "jev": {
+     "ms": 918,
+     "in_tok": 419,
+     "cost": 1.7598e-05,
+     "model": "typesafe/jev-1.13-20260917",
+     "err": null,
+     "raw": {
+      "type": "noul",
+      "noul": 0.03
+     },
+     "p_violation": 0.03
+    }
+   }
+  },
+  {
+   "id": "fx2-003",
+   "target": 0,
+   "label": 1,
+   "class": null,
+   "label_source": "constructed",
+   "cluster": "ds-dansuk-biofuel-cartel-2026-07",
+   "n_options": 2,
+   "arms": {
+    "glm": {
+     "p_violation": 0.5612296620990991,
+     "ms": 818,
+     "cost": 1.90575e-05,
+     "in_tok": 315,
+     "err": null,
+     "mass": [
+      0.9919,
+      0.9851
+     ],
+     "provider": "Cloudflare",
+     "reasoning_tokens": [
+      0,
+      0
+     ]
+    },
+    "qwen": {
+     "p_violation": 0.016301136198217575,
+     "ms": 1060,
+     "cost": 1.5125e-05,
+     "in_tok": 250,
+     "err": null,
+     "mass": [
+      0.9843,
+      0.9895
+     ],
+     "provider": "Parasail",
+     "reasoning_tokens": [
+      0,
+      0
+     ]
+    },
+    "deepseek": {
+     "p_violation": 0.00047555737659074816,
+     "ms": 1993,
+     "cost": 3.9620000000000004e-05,
+     "in_tok": 283,
+     "err": null,
+     "mass": [
+      0.9982,
+      0.9999
+     ],
+     "provider": "DigitalOcean",
+     "reasoning_tokens": [
+      0,
+      0
+     ]
+    },
+    "jev": {
+     "ms": 535,
+     "in_tok": 396,
+     "cost": 1.6632e-05,
+     "model": "typesafe/jev-1.13-20260917",
+     "err": null,
+     "raw": {
+      "type": "noul",
+      "noul": 0.01
+     },
+     "p_violation": 0.01
+    }
+   }
+  }
+ ],
+ "agg": {
+  "glm": {
+   "n": 4,
+   "ok": 4,
+   "hit": 4,
+   "ms": 21789,
+   "cost": 7.6714e-05
+  },
+  "qwen": {
+   "n": 4,
+   "ok": 4,
+   "hit": 0,
+   "ms": 4986,
+   "cost": 6.0984e-05
+  },
+  "deepseek": {
+   "n": 4,
+   "ok": 4,
+   "hit": 0,
+   "ms": 9698,
+   "cost": 0.00015904
+  },
+  "jev": {
+   "n": 4,
+   "ok": 4,
+   "hit": 0,
+   "ms": 3445,
+   "cost": 6.7326e-05
+  }
+ }
+}

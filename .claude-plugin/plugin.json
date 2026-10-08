@@ -1,0 +1,9 @@
+{
+  "name": "benchlet",
+  "version": "0.1.0",
+  "description": "Judgment mini-benchmarks from your own data: author skill (minibench-author), review checks, and a bench_* MCP server. Publish without running; run on OpenRouter or any OpenAI-compatible gateway.",
+  "author": {"name": "ernestolee13", "url": "https://github.com/ernestolee13"},
+  "repository": "https://github.com/ernestolee13/benchlet",
+  "license": "MIT",
+  "keywords": ["benchmark", "evaluation", "logprobs", "judgment", "regression", "korean"]
+}

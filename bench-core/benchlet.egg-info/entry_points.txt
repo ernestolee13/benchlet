@@ -1,0 +1,2 @@
+[console_scripts]
+benchlet = benchlet.cli:main

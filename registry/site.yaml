@@ -1,0 +1,4 @@
+# 갤러리 사이트 설정. 도메인이 붙으면 site_url 을 바꾸고 다시 빌드·배포한다.
+site_url: https://benchlet.vibestash.app
+google_site_verification: "dFiyPlm-oYKqjQfHRwsNXDk7iCRcTZauJmWC5LKCMvY"
+naver_site_verification: "b9b5e9c0f477495f5b1301adac3e284c49b59b03"

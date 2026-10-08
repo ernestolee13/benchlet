@@ -1,0 +1,14 @@
+{
+  "name": "benchlet",
+  "description": "benchlet: judgment mini-benchmarks from your own data",
+  "owner": {"name": "ernestolee13", "url": "https://github.com/ernestolee13"},
+  "plugins": [
+    {
+      "name": "benchlet",
+      "description": "Author skill + review checks + bench_* MCP server for 40-100 item judgment benches. Publish first, run later (OpenRouter or any OpenAI-compatible gateway).",
+      "source": "./",
+      "category": "development",
+      "tags": ["benchmark", "evaluation", "logprobs", "regression", "korean"]
+    }
+  ]
+}

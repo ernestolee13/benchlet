@@ -1,0 +1,57 @@
+name: example-summary-norm
+version: 1
+guide: '이 요약 문장이 편집 규범을 위반하는가. 위반은 다음 셋이다. (1) 판단이나 비난이 담긴 어휘를 쓴다 (2) 강조 부사를 쓴다 (예: 무려, 심지어, 결국) (3) 두 문장 이상이다. 사실만 담은 한 문장은 통과다. 입력은 요약 문장 하나다.
+
+  '
+choices:
+- 위반
+- 통과
+task_signature:
+  goal: compliance
+  answer: binary
+  prob_use: accuracy_only
+  label: constructed
+  unit: sentence
+  language: ko
+license: CC-BY-4.0
+visibility: full
+items:
+- input: 규제 기관이 한 유통사에 표시광고법 위반으로 과징금 3억원을 부과했다.
+  target: 1
+  evidence: 규칙 (1)(2)(3) 모두 해당 없음
+  class: CLEAN
+  label_source: constructed
+- input: 규제 기관이 한 유통사에 무려 3억원의 과징금을 부과했다.
+  target: 0
+  evidence: 규칙 (2) 강조 부사 「무려」
+  class: W2-intensifier
+  label_source: constructed
+- input: 한 식품사가 원산지를 거짓 표시해 시정명령을 받았다. 소비자 불만이 잇따랐다.
+  target: 0
+  evidence: 규칙 (3) 두 문장
+  class: W3-two-sentences
+  label_source: constructed
+- input: 악질 기업인 한 식품사가 원산지를 거짓 표시해 시정명령을 받았다.
+  target: 0
+  evidence: 규칙 (1) 비난 어휘 「악질」
+  class: W1-forbidden
+  label_source: constructed
+- input: 한 건설사가 하도급 대금을 늦게 지급해 시정명령과 과징금 2억원을 받았다.
+  target: 1
+  evidence: 규칙 (1)(2)(3) 모두 해당 없음
+  class: CLEAN
+  label_source: constructed
+- input: 한 통신사가 요금제 광고에서 조건을 누락해 과태료 1000만원을 부과받았다.
+  target: 1
+  evidence: 규칙 (1)(2)(3) 모두 해당 없음
+  class: CLEAN
+  label_source: constructed
+taxonomy:
+  domain:
+  - editorial
+  input_kind: sentence
+  source_kind: synthetic-rules
+  language: ko
+keywords:
+- 편집 규범
+- 예시

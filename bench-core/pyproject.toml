@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+# 패키지 이름은 가칭이다. 이름을 바꿀 때는 여기와 benchlet/__init__.py 의 NAME 만 바꾼다.
+name = "benchlet"
+version = "0.1.0"
+description = "Judgment mini-benchmarks from your own data: schema, review checks, runner, stats, export"
+requires-python = ">=3.9"
+license = {text = "MIT"}
+dependencies = ["pyyaml>=6"]
+
+[project.scripts]
+benchlet = "benchlet.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["benchlet*"]
+
+[tool.setuptools.package-data]
+benchlet = ["data/*.json"]

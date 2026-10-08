@@ -1,0 +1,131 @@
+{
+ "verified_at": "2026-09-29",
+ "critical": [
+  "reasoning:{enabled:false} 를 반드시 넣는다. 없으면 추론 토큰이 max_tokens 를 먹고 logprobs 가 null 이 된다",
+  "provider.only 로 핀하고 allow_fallbacks:false 를 넣는다. require_parameters:true 만으로는 라우팅이 안 된다",
+  "supported_parameters 플래그를 믿지 않는다. 모델·provider 단위 둘 다 틀렸다",
+  "provider 별 로그확률 정밀도와 재현성을 확인한다. cloudflare 는 top_logprobs 를 거칠게 반올림해 반환해 서로 다른 확률값이 벤치당 10~15개뿐이다(glm-4.7-flash, 2026-09-30 실측 4벤치). 그 팔의 AUROC 가 0.5 근처로 나오는 원인이 모델이 아니라 provider 다. digitalocean 의 deepseek-v4-flash 는 temperature 0 에서도 같은 호출의 P(A) 가 최대 0.13 흔들린다. parasail 의 qwen 은 3회 모두 동일"
+ ],
+ "call_template": {
+  "max_tokens": 1,
+  "temperature": 0,
+  "logprobs": true,
+  "top_logprobs": 8,
+  "reasoning": {
+   "enabled": false
+  },
+  "provider": {
+   "only": [
+    "<pin>"
+   ],
+   "allow_fallbacks": false,
+   "require_parameters": true
+  }
+ },
+ "verified_working": [
+  {
+   "model": "deepseek/deepseek-v4-flash-0731",
+   "provider": "coreweave",
+   "in_per_m": 0.018,
+   "ms": 689,
+   "family": "DeepSeek",
+   "note": "최저가. 날짜 고정 버전"
+  },
+  {
+   "model": "nvidia/nemotron-3.5-lightning",
+   "provider": "coreweave",
+   "in_per_m": 0.06,
+   "ms": 520,
+   "family": "NVIDIA"
+  },
+  {
+   "model": "z-ai/glm-4.7-flash",
+   "provider": "cloudflare",
+   "in_per_m": 0.0605,
+   "ms": 366,
+   "family": "GLM",
+   "note": "Z.ai 자체 API 엔 파라미터가 없다. 오픈웨이트 재호스팅이라 된다"
+  },
+  {
+   "model": "qwen/qwen3.8-27b",
+   "provider": "parasail",
+   "in_per_m": 0.0605,
+   "ms": 368,
+   "family": "Qwen"
+  },
+  {
+   "model": "google/gemma-4-31b-it",
+   "provider": "coreweave",
+   "in_per_m": 0.09,
+   "ms": 416,
+   "family": "Gemma",
+   "note": "Bespoke Labs 외부 대조의 그 계열"
+  },
+  {
+   "model": "google/gemma-4-26b-a4b-it",
+   "provider": "dekallm",
+   "in_per_m": 0.09,
+   "ms": 482,
+   "family": "Gemma"
+  },
+  {
+   "model": "deepseek/deepseek-v4-flash",
+   "provider": "digitalocean",
+   "in_per_m": 0.14,
+   "ms": 1161,
+   "family": "DeepSeek"
+  },
+  {
+   "model": "deepseek/deepseek-v4.1-flash",
+   "provider": "digitalocean",
+   "in_per_m": 0.3,
+   "ms": 913,
+   "family": "DeepSeek",
+   "note": "입력만 싸고 출력이 비싼 구조. 출력 1토큰만 쓰는 이 용도에 유리"
+  }
+ ],
+ "blocked": [
+  {
+   "model": "z-ai/glm-5.3-flash",
+   "why": "Reasoning is mandatory for this endpoint and cannot be disabled (HTTP 400)"
+  },
+  {
+   "model": "stepfun/step-3.7-flash",
+   "why": "동일"
+  },
+  {
+   "model": "qwen/qwen3.8-flash",
+   "why": "Alibaba 429 속도제한. 판정 불가. qwen3.8-27b 로 대체"
+  },
+  {
+   "model": "minimax/minimax-m2.7",
+   "why": "Mara provider 잔액 0 (502)"
+  }
+ ],
+ "no_logprobs_at_all": {
+  "anthropic": "파라미터 자체가 없다. 전 모델",
+  "openai_current": "gpt-5.x·6.x 벤더 정책 차단. 레거시(gpt-4o-mini)만 가능",
+  "google_gemini": "OpenRouter 31개 중 0개. 단 Gemma 는 된다",
+  "amazon_nova": 0,
+  "microsoft_phi": 0,
+  "cohere": 0
+ },
+ "retest_2026_09_30": {
+  "method": "같은 항목·같은 프롬프트 3회, temperature 0, max_tokens 1",
+  "glm@cloudflare": {
+   "distinct_p_per_bench": "10~15 / 48~88",
+   "spread": 0.12,
+   "note": "값이 0.38/0.50/0.62 같은 계단. 첫 토큰이 A·B 가 아닌 경우도 잦다(「네」「**」)"
+  },
+  "deepseek@digitalocean": {
+   "distinct_p_per_bench": "40~50 / 48~60",
+   "spread": 0.13,
+   "note": "첫 토큰 A·B 가 0.49/0.49 로 갈리는 항목이 있다. 추론 없이 첫 토큰이 무정보"
+  },
+  "qwen@parasail": {
+   "distinct_p_per_bench": "41~51 / 48~60",
+   "spread": 0.0
+  },
+  "reasoning_tokens_verified": 0
+ }
+}

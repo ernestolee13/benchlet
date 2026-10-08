@@ -1,0 +1,7 @@
+Metadata-Version: 2.4
+Name: benchlet
+Version: 0.1.0
+Summary: Judgment mini-benchmarks from your own data: schema, review checks, runner, stats, export
+License: MIT
+Requires-Python: >=3.9
+Requires-Dist: pyyaml>=6

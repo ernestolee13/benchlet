@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "bench": {
+      "command": "python3",
+      "args": ["-m", "benchlet.cli", "mcp"],
+      "env": {"PYTHONPATH": "${CLAUDE_PLUGIN_ROOT:-.}/bench-core", "BENCHLET_ROOT": "${CLAUDE_PLUGIN_ROOT:-.}"}
+    }
+  }
+}

@@ -1,0 +1,12 @@
+#!/bin/sh
+# 레지스트리 갱신 한 바퀴: 작성자 리포 수집 → 결과 없는 벤치에 기준 팔 실행 → 갤러리 빌드 → Vercel 프로덕션 배포.
+# 키(OPENROUTER_API_KEY)와 gh·vercel 로그인을 가진 운영자 머신에서 돈다. 크론에 걸면 PRD 10-1 의 「분기 재실행」이 된다.
+set -e
+HERE="$(cd "$(dirname "$0")/.." && pwd)"
+ROOT="$(cd "$HERE/.." && pwd)"
+B="$HERE/bin/benchlet"
+cd "$ROOT"
+"$B" registry sync || echo "sync: 새로 가져온 벤치 없음"
+"$B" registry run-pending ${ARMS:+--arms "$ARMS"}
+"$B" site build
+if [ "${DEPLOY:-1}" = "1" ]; then (cd site && npx -y vercel@latest deploy . --prod --yes | tail -1); fi

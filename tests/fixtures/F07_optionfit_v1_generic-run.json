@@ -1,0 +1,649 @@
+{
+ "task": "option-fit",
+ "bench": "option-fit@1",
+ "items_sha256": "4a2914c6b11b446e45ead542f179164699427a1368a81e142785b3779179e0f9",
+ "template": "legacy-seed",
+ "date": "2026-09-30",
+ "arms": {
+  "glm": {
+   "model": "z-ai/glm-4.7-flash",
+   "provider": "cloudflare",
+   "family": "GLM",
+   "mode": "logprob",
+   "prob_source": "logprob",
+   "base_url": "openrouter.ai",
+   "in_per_m": 0.0605,
+   "smoke": null
+  },
+  "qwen": {
+   "model": "qwen/qwen3.8-27b",
+   "provider": "parasail",
+   "family": "Qwen",
+   "mode": "logprob",
+   "prob_source": "logprob",
+   "base_url": "openrouter.ai",
+   "in_per_m": 0.0605,
+   "smoke": null
+  },
+  "deepseek": {
+   "model": "deepseek/deepseek-v4-flash",
+   "provider": "digitalocean",
+   "family": "DeepSeek",
+   "mode": "logprob",
+   "prob_source": "logprob",
+   "base_url": "openrouter.ai",
+   "in_per_m": 0.14,
+   "smoke": null
+  },
+  "jev": {
+   "model": "typesafe/jev-1.13",
+   "provider": "openrouter",
+   "family": "Jev",
+   "mode": "typed",
+   "prob_source": "typed",
+   "base_url": "openrouter.ai",
+   "in_per_m": 0.042,
+   "smoke": null
+  }
+ },
+ "items": [
+  {
+   "id": "fx7-000",
+   "target": 0,
+   "label": 1,
+   "class": "V1",
+   "label_source": "constructed",
+   "cluster": "q67",
+   "n_options": 2,
+   "arms": {
+    "glm": {
+     "p_violation": 0.22568347955889573,
+     "ms": 839,
+     "cost": 1.7182e-05,
+     "in_tok": 284,
+     "err": null,
+     "mass": [
+      0.989,
+      0.9895
+     ],
+     "provider": "Cloudflare",
+     "reasoning_tokens": [
+      0,
+      0
+     ]
+    },
+    "qwen": {
+     "p_violation": 0.3262092121031276,
+     "ms": 1018,
+     "cost": 1.5185499999999999e-05,
+     "in_tok": 251,
+     "err": null,
+     "mass": [
+      0.9894,
+      0.9912
+     ],
+     "provider": "Parasail",
+     "reasoning_tokens": [
+      0,
+      0
+     ]
+    },
+    "deepseek": {
+     "p_violation": 0.41869325846725264,
+     "ms": 3330,
+     "cost": 3.6259999999999995e-05,
+     "in_tok": 259,
+     "err": null,
+     "mass": [
+      0.9997,
+      1.0
+     ],
+     "provider": "DigitalOcean",
+     "reasoning_tokens": [
+      0,
+      0
+     ]
+    },
+    "jev": {
+     "ms": 539,
+     "in_tok": 406,
+     "cost": 1.7052000000000002e-05,
+     "model": "typesafe/jev-1.13-20260917",
+     "err": null,
+     "raw": {
+      "type": "noul",
+      "noul": 0.47
+     },
+     "p_violation": 0.47
+    }
+   }
+  },
+  {
+   "id": "fx7-001",
+   "target": 0,
+   "label": 1,
+   "class": "V1",
+   "label_source": "constructed",
+   "cluster": "q7",
+   "n_options": 2,
+   "arms": {
+    "glm": {
+     "p_violation": 0.22568347147694812,
+     "ms": 883,
+     "cost": 1.6819e-05,
+     "in_tok": 278,
+     "err": null,
+     "mass": [
+      0.9811,
+      0.9849
+     ],
+     "provider": "Cloudflare",
+     "reasoning_tokens": [
+      0,
+      0
+     ]
+    },
+    "qwen": {
+     "p_violation": 0.3414542506093104,
+     "ms": 1599,
+     "cost": 1.55485e-05,
+     "in_tok": 257,
+     "err": null,
+     "mass": [
+      0.992,
+      0.9909
+     ],
+     "provider": "Parasail",
+     "reasoning_tokens": [
+      0,
+      0
+     ]
+    },
+    "deepseek": {
+     "p_violation": 0.10270145140483464,
+     "ms": 1516,
+     "cost": 3.57e-05,
+     "in_tok": 255,
+     "err": null,
+     "mass": [
+      1.0,
+      1.0
+     ],
+     "provider": "DigitalOcean",
+     "reasoning_tokens": [
+      0,
+      0
+     ]
+    },
+    "jev": {
+     "ms": 447,
+     "in_tok": 400,
+     "cost": 1.6800000000000002e-05,
+     "model": "typesafe/jev-1.13-20260917",
+     "err": null,
+     "raw": {
+      "type": "noul",
+      "noul": 0.32
+     },
+     "p_violation": 0.32
+    }
+   }
+  },
+  {
+   "id": "fx7-002",
+   "target": 0,
+   "label": 1,
+   "class": "V1",
+   "label_source": "constructed",
+   "cluster": "q62",
+   "n_options": 2,
+   "arms": {
+    "glm": {
+     "p_violation": 0.24837179775692103,
+     "ms": 2119,
+     "cost": 1.6819e-05,
+     "in_tok": 278,
+     "err": null,
+     "mass": [
+      0.9857,
+      0.9895
+     ],
+     "provider": "Cloudflare",
+     "reasoning_tokens": [
+      0,
+      0
+     ]
+    },
+    "qwen": {
+     "p_violation": 0.16509203037648096,
+     "ms": 1033,
+     "cost": 1.45805e-05,
+     "in_tok": 241,
+     "err": null,
+     "mass": [
+      0.9913,
+      0.987
+     ],
+     "provider": "Parasail",
+     "reasoning_tokens": [
+      0,
+      0
+     ]
+    },
+    "deepseek": {
+     "p_violation": 0.29257693546526015,
+     "ms": 1760,
+     "cost": 3.5140000000000006e-05,
+     "in_tok": 251,
+     "err": null,
+     "mass": [
+      1.0,
+      0.9999
+     ],
+     "provider": "DigitalOcean",
+     "reasoning_tokens": [
+      0,
+      0
+     ]
+    },
+    "jev": {
+     "ms": 672,
+     "in_tok": 394,
+     "cost": 1.6548e-05,
+     "model": "typesafe/jev-1.13-20260917",
+     "err": null,
+     "raw": {
+      "type": "noul",
+      "noul": 0.15
+     },
+     "p_violation": 0.15
+    }
+   }
+  },
+  {
+   "id": "fx7-003",
+   "target": 0,
+   "label": 1,
+   "class": "V1",
+   "label_source": "constructed",
+   "cluster": "q142",
+   "n_options": 2,
+   "arms": {
+    "glm": {
+     "p_violation": 0.11920291811080203,
+     "ms": 877,
+     "cost": 1.6093e-05,
+     "in_tok": 266,
+     "err": null,
+     "mass": [
+      0.9877,
+      0.99
+     ],
+     "provider": "Cloudflare",
+     "reasoning_tokens": [
+      0,
+      0
+     ]
+    },
+    "qwen": {
+     "p_violation": 0.5912821190199052,
+     "ms": 1163,
+     "cost": 1.4822499999999999e-05,
+     "in_tok": 245,
+     "err": null,
+     "mass": [
+      0.9912,
+      0.9855
+     ],
+     "provider": "Parasail",
+     "reasoning_tokens": [
+      0,
+      0
+     ]
+    },
+    "deepseek": {
+     "p_violation": 0.10406692221091018,
+     "ms": 1607,
+     "cost": 3.374e-05,
+     "in_tok": 241,
+     "err": null,
+     "mass": [
+      1.0,
+      0.9999
+     ],
+     "provider": "DigitalOcean",
+     "reasoning_tokens": [
+      0,
+      0
+     ]
+    },
+    "jev": {
+     "ms": 271,
+     "in_tok": 397,
+     "cost": 1.6674e-05,
+     "model": "typesafe/jev-1.13-20260917",
+     "err": null,
+     "raw": {
+      "type": "noul",
+      "noul": 0.33
+     },
+     "p_violation": 0.33
+    }
+   }
+  },
+  {
+   "id": "fx7-004",
+   "target": 0,
+   "label": 1,
+   "class": "V1",
+   "label_source": "constructed",
+   "cluster": "q72",
+   "n_options": 2,
+   "arms": {
+    "glm": {
+     "p_violation": 0.3412127619031782,
+     "ms": 949,
+     "cost": 1.6698e-05,
+     "in_tok": 276,
+     "err": null,
+     "mass": [
+      0.9806,
+      0.9902
+     ],
+     "provider": "Cloudflare",
+     "reasoning_tokens": [
+      0,
+      0
+     ]
+    },
+    "qwen": {
+     "p_violation": 0.18503658019139013,
+     "ms": 1224,
+     "cost": 1.45805e-05,
+     "in_tok": 241,
+     "err": null,
+     "mass": [
+      0.9932,
+      0.987
+     ],
+     "provider": "Parasail",
+     "reasoning_tokens": [
+      0,
+      0
+     ]
+    },
+    "deepseek": {
+     "p_violation": 0.44939164101745505,
+     "ms": 2293,
+     "cost": 3.486e-05,
+     "in_tok": 249,
+     "err": null,
+     "mass": [
+      1.0,
+      1.0
+     ],
+     "provider": "DigitalOcean",
+     "reasoning_tokens": [
+      0,
+      0
+     ]
+    },
+    "jev": {
+     "ms": 1031,
+     "in_tok": 395,
+     "cost": 1.6590000000000002e-05,
+     "model": "typesafe/jev-1.13-20260917",
+     "err": null,
+     "raw": {
+      "type": "noul",
+      "noul": 0.17
+     },
+     "p_violation": 0.17
+    }
+   }
+  },
+  {
+   "id": "fx7-005",
+   "target": 0,
+   "label": 1,
+   "class": "V1",
+   "label_source": "constructed",
+   "cluster": "q143",
+   "n_options": 2,
+   "arms": {
+    "glm": {
+     "p_violation": 0.18242552269512868,
+     "ms": 897,
+     "cost": 1.6577e-05,
+     "in_tok": 274,
+     "err": null,
+     "mass": [
+      0.9876,
+      0.9822
+     ],
+     "provider": "Cloudflare",
+     "reasoning_tokens": [
+      0,
+      0
+     ]
+    },
+    "qwen": {
+     "p_violation": 0.5768343522878054,
+     "ms": 1364,
+     "cost": 1.49435e-05,
+     "in_tok": 247,
+     "err": null,
+     "mass": [
+      0.9939,
+      0.9859
+     ],
+     "provider": "Parasail",
+     "reasoning_tokens": [
+      0,
+      0
+     ]
+    },
+    "deepseek": {
+     "p_violation": 0.09773653695810082,
+     "ms": 2350,
+     "cost": 3.486e-05,
+     "in_tok": 249,
+     "err": null,
+     "mass": [
+      1.0,
+      0.9999
+     ],
+     "provider": "DigitalOcean",
+     "reasoning_tokens": [
+      0,
+      0
+     ]
+    },
+    "jev": {
+     "ms": 357,
+     "in_tok": 398,
+     "cost": 1.6716e-05,
+     "model": "typesafe/jev-1.13-20260917",
+     "err": null,
+     "raw": {
+      "type": "noul",
+      "noul": 0.27
+     },
+     "p_violation": 0.27
+    }
+   }
+  },
+  {
+   "id": "fx7-006",
+   "target": 0,
+   "label": 1,
+   "class": "V1",
+   "label_source": "constructed",
+   "cluster": "q181",
+   "n_options": 2,
+   "arms": {
+    "glm": {
+     "p_violation": 0.15081422270960676,
+     "ms": 786,
+     "cost": 1.9118e-05,
+     "in_tok": 316,
+     "err": null,
+     "mass": [
+      0.9732,
+      0.9782
+     ],
+     "provider": "Cloudflare",
+     "reasoning_tokens": [
+      0,
+      0
+     ]
+    },
+    "qwen": {
+     "p_violation": 0.20809591112507977,
+     "ms": 1207,
+     "cost": 1.65165e-05,
+     "in_tok": 273,
+     "err": null,
+     "mass": [
+      0.9754,
+      0.9749
+     ],
+     "provider": "Parasail",
+     "reasoning_tokens": [
+      0,
+      0
+     ]
+    },
+    "deepseek": {
+     "p_violation": 0.28004332751548244,
+     "ms": 2219,
+     "cost": 3.990000000000001e-05,
+     "in_tok": 285,
+     "err": null,
+     "mass": [
+      0.9995,
+      0.9998
+     ],
+     "provider": "DigitalOcean",
+     "reasoning_tokens": [
+      0,
+      0
+     ]
+    },
+    "jev": {
+     "ms": 388,
+     "in_tok": 414,
+     "cost": 1.7388e-05,
+     "model": "typesafe/jev-1.13-20260917",
+     "err": null,
+     "raw": {
+      "type": "noul",
+      "noul": 0.13
+     },
+     "p_violation": 0.13
+    }
+   }
+  },
+  {
+   "id": "fx7-007",
+   "target": 0,
+   "label": 1,
+   "class": "V1",
+   "label_source": "constructed",
+   "cluster": "q182",
+   "n_options": 2,
+   "arms": {
+    "glm": {
+     "p_violation": 0.3232410456561524,
+     "ms": 3017,
+     "cost": 1.8029e-05,
+     "in_tok": 298,
+     "err": null,
+     "mass": [
+      0.9411,
+      0.9815
+     ],
+     "provider": "Cloudflare",
+     "reasoning_tokens": [
+      0,
+      0
+     ]
+    },
+    "qwen": {
+     "p_violation": 0.17380914196809893,
+     "ms": 1121,
+     "cost": 1.5790499999999997e-05,
+     "in_tok": 261,
+     "err": null,
+     "mass": [
+      0.9875,
+      0.9808
+     ],
+     "provider": "Parasail",
+     "reasoning_tokens": [
+      0,
+      0
+     ]
+    },
+    "deepseek": {
+     "p_violation": 0.38419273011998356,
+     "ms": 3949,
+     "cost": 3.682e-05,
+     "in_tok": 263,
+     "err": null,
+     "mass": [
+      0.9999,
+      0.9999
+     ],
+     "provider": "DigitalOcean",
+     "reasoning_tokens": [
+      0,
+      0
+     ]
+    },
+    "jev": {
+     "ms": 246,
+     "in_tok": 406,
+     "cost": 1.7052000000000002e-05,
+     "model": "typesafe/jev-1.13-20260917",
+     "err": null,
+     "raw": {
+      "type": "noul",
+      "noul": 0.13
+     },
+     "p_violation": 0.13
+    }
+   }
+  }
+ ],
+ "agg": {
+  "glm": {
+   "n": 8,
+   "ok": 8,
+   "hit": 0,
+   "ms": 10367,
+   "cost": 0.00013733499999999999
+  },
+  "qwen": {
+   "n": 8,
+   "ok": 8,
+   "hit": 2,
+   "ms": 9729,
+   "cost": 0.000121968
+  },
+  "deepseek": {
+   "n": 8,
+   "ok": 8,
+   "hit": 0,
+   "ms": 19024,
+   "cost": 0.00028728
+  },
+  "jev": {
+   "n": 8,
+   "ok": 8,
+   "hit": 0,
+   "ms": 3951,
+   "cost": 0.00013482000000000001
+  }
+ }
+}

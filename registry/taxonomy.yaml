@@ -1,0 +1,69 @@
+# benchlet 분류 체계 (통제 어휘). 벤치를 올릴 때와 찾을 때 같은 말을 쓰기 위한 것. 스킬 references/taxonomy.md 와 같은 내용.
+# 다섯 축: goal(무엇을 재나) · domain(판정이 사는 업무 영역) · input_kind(입력 모양) · source_kind(라벨이 어디서 왔나) · language.
+# keywords 는 자유 태그이되 아래 시작 목록과 동의어 표를 먼저 쓴다. 검색은 동의어를 같은 말로 본다.
+version: 1
+goal:
+  compliance: 규정·지침 준수 여부 (위반인가)
+  classify: 카테고리 고르기
+  route: 경로·도구·담당 고르기
+  derive: 원문에서 도출한 값·주장 검증
+  gate: 임계·조건 통과 판정 (실행해도 되나, 확인이 필요한가)
+  fit: 둘이 맞물리나 (질문과 선택지, 두 이슈, 질의와 문단)
+  rank: 순서·우선순위
+domain:
+  customer-support: 고객 문의·상담·에스컬레이션
+  content-moderation: 게시물·댓글 안전·규정
+  editorial: 글쓰기 규범·발행 전 점검·요약 품질
+  code-review: 커밋·PR·코드 규칙
+  data-quality: 데이터·JSON·스키마·파싱 검증
+  agent-tools: 에이전트 도구 선택·실행 전 확인
+  browser-automation: 화면 요소 선택·탐색
+  retrieval-rag: 근거 선별·환각 점검·인용 검증
+  security: 권한·보안·SQL 실행 안전
+  communication: 메일·메시지 분류와 우선순위
+  scheduling: 일정·날짜 산술·기한
+  knowledge-exam: 시험형 지식 문제 (공개 벤치)
+  commonsense: 상식 추론 (공개 벤치)
+  truthfulness: 사실성·오해 (공개 벤치)
+  legal: 법·규제 판단
+  finance-ops: 결제·환불·금액 도출
+  survey-design: 설문 문항·선택지 정합
+  product-ops: 운영 큐·승인·게시 경로
+input_kind: [sentence, paragraph, pair, record, query, page-tree, conversation, document]
+source_kind:
+  own-data: 내 프로젝트 데이터에서 뽑음 (라벨 경로 1·2)
+  public-distilled: 공개 벤치를 축약함 (모델별 응답으로 검증)
+  synthetic-rules: 규칙을 먼저 적고 그 규칙대로 작성함
+language: [ko, en, mixed]
+keywords:
+  # 시작 목록. 왼쪽이 정규형, 오른쪽이 동의어. 검색·레이블링 모두 정규형으로 맞춘다.
+  환불: [refund, 환급]
+  스팸: [spam, 광고, 홍보]
+  에스컬레이션: [escalation, 상담사 연결, 긴급]
+  분류: [triage, classification, 카테고리]
+  라우팅: [routing, router, 도구 선택, tool selection]
+  확인 게이트: [confirmation, destructive action, 되돌리기 어려운, 승인]
+  SQL: [query safety, 자동 실행, autorun]
+  스키마: [schema, json, 타입, enum]
+  커밋 메시지: [commit message, conventional commits]
+  코드 리뷰: [code review, PR]
+  RAG: [retrieval, 근거 선별, passage relevance]
+  환각: [hallucination, grounded, 근거 있음, faithfulness]
+  중복: [duplicate, dedup, 같은 이슈]
+  우선순위: [priority, 긴급도, 기한]
+  일정: [schedule, 날짜, 기한, deadline, stale]
+  편집 규범: [editorial norm, 문체, 논평]
+  잔재: [artifact, 머리말, placeholder, 코드펜스]
+  수치 근거: [numbers sourced, 출처 없는 수치, 인용 검증]
+  정합: [option fit, 질문 선택지 일치]
+  지침 준수: [guideline, 가이드라인 위반]
+  상식: [commonsense, hellaswag, winogrande, openbookqa]
+  시험: [exam, mmlu, mmlu-pro, arc, 과학 문제]
+  사실성: [truthfulqa, 오해, misconception]
+  브라우저: [browser, click target, accessibility tree, 접근성 트리]
+  메일: [email, 메일함, inbox]
+  고객 문의: [support ticket, 문의, CS]
+  댓글: [comment, 안전 필터]
+  승인 큐: [approval queue, 반려, 검수]
+  뉴스 요약: [news summary, 기업 이슈]
+  설문 문항: [survey question, banban]

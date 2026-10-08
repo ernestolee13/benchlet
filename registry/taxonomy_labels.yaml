@@ -1,0 +1,475 @@
+action-confirm-gate:
+  domain:
+  - agent-tools
+  - security
+  input_kind: query
+  keywords:
+  - 확인 게이트
+  - 되돌리기 어려운
+  language: ko
+  source_kind: synthetic-rules
+aegis-prompt-safety-mini:
+  domain:
+  - content-moderation
+  input_kind: query
+  keywords:
+  - 스팸
+  - 검열
+  - aegis
+  language: en
+  source_kind: public-distilled
+agent-tool-pick:
+  domain:
+  - agent-tools
+  input_kind: query
+  keywords:
+  - 라우팅
+  - 도구 선택
+  language: ko
+  source_kind: synthetic-rules
+answer-grounded-check:
+  domain:
+  - retrieval-rag
+  input_kind: pair
+  keywords:
+  - 환각
+  - 근거 있음
+  language: ko
+  source_kind: synthetic-rules
+arc-challenge-mini:
+  domain:
+  - knowledge-exam
+  input_kind: query
+  keywords:
+  - 시험
+  - arc
+  - 과학 문제
+  language: en
+  source_kind: public-distilled
+bbh-judgment-mini:
+  domain:
+  - commonsense
+  input_kind: paragraph
+  keywords:
+  - 추론
+  - 상식
+  - bbh
+  language: en
+  source_kind: public-distilled
+bbq-mini:
+  domain:
+  - content-moderation
+  input_kind: paragraph
+  keywords:
+  - 편향
+  - 수치 근거
+  - bbq
+  language: en
+  source_kind: public-distilled
+best-of-4-mini:
+  domain:
+  - data-quality
+  input_kind: query
+  keywords:
+  - 심판
+  - 우선순위
+  - rewardbench
+  language: en
+  source_kind: public-distilled
+browser-click-target:
+  domain:
+  - browser-automation
+  - agent-tools
+  input_kind: page-tree
+  keywords:
+  - 브라우저
+  - 접근성 트리
+  language: ko
+  source_kind: synthetic-rules
+commit-message-convention:
+  domain:
+  - code-review
+  input_kind: sentence
+  keywords:
+  - 커밋 메시지
+  - 코드 리뷰
+  language: en
+  source_kind: synthetic-rules
+derivation-check:
+  domain:
+  - finance-ops
+  - data-quality
+  input_kind: pair
+  keywords:
+  - 수치 근거
+  - 금액
+  - 평균
+  - 단위 변환
+  language: ko
+  source_kind: own-data
+duplicate-issue-pair:
+  domain:
+  - product-ops
+  - customer-support
+  input_kind: pair
+  keywords:
+  - 중복
+  - 같은 이슈
+  language: ko
+  source_kind: synthetic-rules
+editorial-norm:
+  domain:
+  - editorial
+  - product-ops
+  input_kind: sentence
+  keywords:
+  - 편집 규범
+  - 뉴스 요약
+  - 논평
+  - 승인 큐
+  language: ko
+  source_kind: own-data
+email-triage-priority:
+  domain:
+  - communication
+  input_kind: record
+  keywords:
+  - 메일
+  - 우선순위
+  - 기한
+  language: ko
+  source_kind: synthetic-rules
+ethics-commonsense-mini:
+  domain:
+  - content-moderation
+  input_kind: paragraph
+  keywords:
+  - 도덕
+  - 상식
+  - ethics
+  language: en
+  source_kind: public-distilled
+example-summary-norm:
+  domain:
+  - editorial
+  input_kind: sentence
+  keywords:
+  - 편집 규범
+  - 예시
+  language: ko
+  source_kind: synthetic-rules
+guideline-compliance:
+  domain:
+  - editorial
+  - content-moderation
+  input_kind: paragraph
+  keywords:
+  - 지침 준수
+  - 장면
+  - 실명
+  language: ko
+  source_kind: own-data
+halueval-qa-mini:
+  domain:
+  - retrieval-rag
+  input_kind: paragraph
+  keywords:
+  - 환각
+  - halueval
+  language: en
+  source_kind: public-distilled
+hellaswag-mini:
+  domain:
+  - commonsense
+  input_kind: paragraph
+  keywords:
+  - 상식
+  - hellaswag
+  language: en
+  source_kind: public-distilled
+jbb-jailbreak-judge-mini:
+  domain:
+  - content-moderation
+  - security
+  input_kind: paragraph
+  keywords:
+  - 탈옥
+  - 심판
+  - jailbreakbench
+  language: en
+  source_kind: public-distilled
+json-schema-fit:
+  domain:
+  - data-quality
+  input_kind: record
+  keywords:
+  - 스키마
+  - json
+  language: ko
+  source_kind: synthetic-rules
+judge-pair-mini:
+  domain:
+  - data-quality
+  input_kind: pair
+  keywords:
+  - 심판
+  - 정합
+  - judgebench
+  language: en
+  source_kind: public-distilled
+legal-lobbying-mini:
+  domain:
+  - legal
+  input_kind: document
+  keywords:
+  - 법률
+  - 정합
+  - legalbench
+  language: en
+  source_kind: public-distilled
+mmlu-mini:
+  domain:
+  - knowledge-exam
+  input_kind: query
+  keywords:
+  - 시험
+  - mmlu
+  language: en
+  source_kind: public-distilled
+mmlu-pro-mini:
+  domain:
+  - knowledge-exam
+  input_kind: query
+  keywords:
+  - 시험
+  - mmlu-pro
+  language: en
+  source_kind: public-distilled
+musr-murder-mini:
+  domain:
+  - commonsense
+  input_kind: document
+  keywords:
+  - 추론
+  - 상식
+  - musr
+  language: en
+  source_kind: public-distilled
+musr-objects-mini:
+  domain:
+  - commonsense
+  input_kind: document
+  keywords:
+  - 추론
+  - 상식
+  - musr
+  language: en
+  source_kind: public-distilled
+openbookqa-mini:
+  domain:
+  - commonsense
+  input_kind: query
+  keywords:
+  - 상식
+  - openbookqa
+  language: en
+  source_kind: public-distilled
+option-fit:
+  domain:
+  - survey-design
+  input_kind: pair
+  keywords:
+  - 정합
+  - 설문 문항
+  language: ko
+  source_kind: own-data
+rag-passage-relevance:
+  domain:
+  - retrieval-rag
+  input_kind: pair
+  keywords:
+  - RAG
+  - 근거 선별
+  language: ko
+  source_kind: synthetic-rules
+route-selection:
+  domain:
+  - agent-tools
+  input_kind: query
+  keywords:
+  - 라우팅
+  - 도구 선택
+  - vault
+  language: ko
+  source_kind: own-data
+sns-banban-review-hard:
+  domain:
+  - editorial
+  - content-moderation
+  input_kind: paragraph
+  keywords:
+  - 지침 준수
+  - 실명
+  - 실화 주장
+  - 정합
+  language: ko
+  source_kind: own-data
+sns-numbers-sourced:
+  domain:
+  - editorial
+  - retrieval-rag
+  input_kind: pair
+  keywords:
+  - 수치 근거
+  - 인용 검증
+  - 칼럼
+  language: ko
+  source_kind: own-data
+sns-numbers-sourced-v2:
+  domain:
+  - editorial
+  - retrieval-rag
+  input_kind: pair
+  keywords:
+  - 수치 근거
+  - 인용 검증
+  - 칼럼
+  language: ko
+  source_kind: own-data
+sns-published-audit:
+  domain:
+  - editorial
+  - product-ops
+  input_kind: paragraph
+  keywords:
+  - 잔재
+  - 발행 전 점검
+  - 머리말
+  language: ko
+  source_kind: own-data
+sns-published-audit-v2:
+  domain:
+  - editorial
+  - product-ops
+  input_kind: paragraph
+  keywords:
+  - 잔재
+  - 발행 전 점검
+  - 머리말
+  language: ko
+  source_kind: own-data
+sns-q-option-fit:
+  domain:
+  - survey-design
+  input_kind: pair
+  keywords:
+  - 정합
+  - 설문 문항
+  language: ko
+  source_kind: own-data
+sns-stale-schedule:
+  domain:
+  - scheduling
+  - editorial
+  input_kind: sentence
+  keywords:
+  - 일정
+  - 기한
+  - 날짜 산술
+  - stale
+  language: ko
+  source_kind: own-data
+sql-autorun-gate:
+  domain:
+  - security
+  - agent-tools
+  - data-quality
+  input_kind: record
+  keywords:
+  - SQL
+  - 확인 게이트
+  - 자동 실행
+  language: ko
+  source_kind: synthetic-rules
+support-escalation-route:
+  domain:
+  - customer-support
+  input_kind: record
+  keywords:
+  - 에스컬레이션
+  - 라우팅
+  - 스팸
+  - 고객 문의
+  language: ko
+  source_kind: synthetic-rules
+support-ticket-triage:
+  domain:
+  - customer-support
+  input_kind: record
+  keywords:
+  - 고객 문의
+  - 분류
+  - 환불
+  language: ko
+  source_kind: synthetic-rules
+tool-call-gate-mini:
+  domain:
+  - agent-tools
+  input_kind: query
+  keywords:
+  - 도구 선택
+  - 확인 게이트
+  - bfcl
+  language: en
+  source_kind: public-distilled
+tool-pick-mini:
+  domain:
+  - agent-tools
+  input_kind: query
+  keywords:
+  - 도구 선택
+  - 라우팅
+  - bfcl
+  language: en
+  source_kind: public-distilled
+truthfulqa-mc1-mini:
+  domain:
+  - truthfulness
+  input_kind: query
+  keywords:
+  - 사실성
+  - truthfulqa
+  language: en
+  source_kind: public-distilled
+warmpod-event-gate:
+  domain:
+  - editorial
+  - product-ops
+  input_kind: record
+  keywords:
+  - 승인 큐
+  - 뉴스 요약
+  - 등재 기준
+  language: ko
+  source_kind: own-data
+winogrande-mini:
+  domain:
+  - commonsense
+  input_kind: sentence
+  keywords:
+  - 상식
+  - winogrande
+  - 대명사
+  language: en
+  source_kind: public-distilled
+xstest-refusal-mini:
+  domain:
+  - content-moderation
+  - security
+  input_kind: query
+  keywords:
+  - 거절
+  - 확인 게이트
+  - xstest
+  language: en
+  source_kind: public-distilled

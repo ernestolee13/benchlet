@@ -1,0 +1,4 @@
+#!/bin/sh
+# 개발용 실행기. 패키지를 설치하지 않고 리포에서 바로 쓴다: PATH 에 bench-core/bin 을 넣거나 직접 호출한다.
+HERE="$(cd "$(dirname "$0")/.." && pwd)"
+PYTHONPATH="$HERE${PYTHONPATH:+:$PYTHONPATH}" exec python3 -m benchlet.cli "$@"
