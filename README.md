@@ -42,7 +42,7 @@ bench-core/bin/benchlet run      --bench benches/example --arms glm,qwen,deepsee
 bench-core/bin/benchlet publish  --bench benches/example --github   # 내 GitHub 리포로
 ```
 
-직접 돌리려면 OpenAI 호환 게이트웨이 하나와 키 하나면 된다. 우리가 확인한 조합은 OpenRouter 뿐이고(`results/or_verified.json`), 다른 게이트웨이는 `custom:<model>` 설정에 `BENCHLET_BASE_URL` 과 `BENCHLET_API_KEY` 를 준다. 키는 환경변수나 `~/.config/benchlet/env` 에서 읽고 코드와 로그에 값을 남기지 않는다.
+모델도 엔드포인트도 고정이 아니다. 첫 토큰 로그프롭을 주는 OpenAI 호환 엔드포인트면 어떤 모델이든 `custom:<model>` 설정에 `BENCHLET_BASE_URL` 과 `BENCHLET_API_KEY` 를 주고 돌릴 수 있고, 스모크가 로그프롭과 재현성을 먼저 확인한다. 지정하지 않으면 기본 넷(glm-4.7-flash, qwen3.8-27b, deepseek-v4-flash, jev-1.13)을 OpenRouter 로 쓴다. 운영자가 직접 확인한 조합은 이 넷이다(`results/or_verified.json`). 키는 환경변수나 `~/.config/benchlet/env` 에서 읽고 코드와 로그에 값을 남기지 않는다.
 
 ## 예시 한 흐름: 승인 요약 게이트에는 어느 모델이 맞나
 
@@ -71,7 +71,7 @@ bench-core/bin/benchlet publish  --bench benches/example --github   # 내 GitHub
 
 갤러리의 벤치는 전부 누군가의 실제 작업 판정이다. 질문, 선택지, 클래스 표, 어느 모델이 맞았는지가 그대로 보인다. 스킬은 새 벤치를 만들기 전에 갤러리에서 비슷한 벤치를 찾아 「포크할까」를 묻고, 포크하면 질문과 선택지, 클래스 표를 가져오고 항목만 내 데이터로 채운다. 쓸모 있었던 벤치의 작성자에게는 스타를 남길 수 있고, 그 스타는 갤러리의 신뢰 점수에 반영된다.
 
-앞으로 할 일. 운영자에게 여유 크레딧이 생기거나 지원 프로그램에 선정되면, 사용자가 올린 벤치를 주요 모델들로 우리가 돌려 결과를 붙이는 쪽으로 구상하고 있다. 지금은 기준 모델 넷을 한 번 돌려 붙인다.
+앞으로 할 일. 운영자에게 여유 크레딧이 생기거나 지원 프로그램에 선정되면, 사용자가 올린 벤치를 주요 모델들로 우리가 돌려 결과를 붙이는 쪽으로 구상하고 있다. 지금은 기본 모델 넷을 한 번 돌려 붙인다.
 
 ## 갤러리에 있는 것
 
@@ -105,7 +105,7 @@ tests/           pytest
 
 ## 한계
 
-- 검증한 게이트웨이는 OpenRouter 뿐이다. Anthropic API 와 OpenAI 현세대는 로그프롭이 없어 로그프롭 방식으로는 못 쓴다.
+- 운영자가 직접 확인한 조합은 OpenRouter 의 기본 넷뿐이다. Anthropic API 와 OpenAI 현세대는 로그프롭이 없어 로그프롭 방식으로는 못 쓰고, 생성 방식(답 글자를 읽음)으로 강등된다.
 - 선택지가 10개를 넘으면 첫 토큰 라벨 질량 실패가 는다.
 - 작성자가 돌린 결과만 있는 벤치의 점수는 그 한 번의 실행이다. 커뮤니티 검증이 쌓여야 공식 점수가 된다.
 
