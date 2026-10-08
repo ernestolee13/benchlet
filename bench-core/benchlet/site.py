@@ -493,7 +493,8 @@ benchlet run --bench my-norm --arms glm,qwen,jev</pre></div>
       <li><div class="jn">1</div><div class="jb"><h3>구경한다</h3><p>갤러리의 벤치는 전부 누군가의 실제 작업 판정이다. 질문, 선택지, 클래스 표, 어느 모델이 맞았는지가 그대로 보인다.</p></div></li>
       <li><div class="jn">2</div><div class="jb"><h3>비슷한 벤치를 포크해 내 데이터로 채운다</h3><p>스킬이 새 벤치를 만들기 전에 갤러리에서 비슷한 벤치를 찾아 「포크할까」를 묻는다. 질문과 선택지, 클래스 표를 가져오고 항목만 내 데이터로 채운다. 계보가 남는다.</p></div></li>
       <li><div class="jn">3</div><div class="jb"><h3>내 리포에 올린다, 가능하면 공개로</h3><p>벤치는 처음부터 공개해도 되는 수준으로 만들어진다. 원자료는 올라가지 않고 생성기와 표본 5건, 결과만 간다. 개인정보 스캔을 통과해야 올라가고, 내 GitHub 리포에 쌓이니 언제든 내릴 수 있다.</p></div></li>
-      <li class="next"><div class="jn">4</div><div class="jb"><h3>앞으로: 올린 벤치를 주요 모델로 우리가 돌린다</h3><p>운영자에게 여유 크레딧이 생기거나 지원 프로그램에 선정되면, 사용자가 올린 벤치를 주요 모델들로 돌려 결과를 붙일 계획이다. 지금은 기준 모델 넷을 한 번 돌려 붙인다.</p></div></li>
+      <li><div class="jn">4</div><div class="jb"><h3>서로 검증한다</h3><p>남의 벤치에 새 모델을 돌려 <code>benchlet submit</code> 으로 제출하면 내 리포의 community 폴더에 쌓이고 갤러리가 모은다. 같은 판본(항목 해시 동일)에 서로 다른 제출자 3명의 결과가 5pp 안에 모이면 「검증됨」 배지가 붙고 중앙값이 공식 점수가 된다. 작성자 본인 제출은 세지 않는다. 한 사람의 결과는 그때까지 「제출 1건」으로만 보인다. 운영자도 기준 모델 넷으로 다시 돌려 「레지스트리 실행」 배지로 붙인다.</p></div></li>
+      <li class="next"><div class="jn">5</div><div class="jb"><h3>앞으로: 올린 벤치를 주요 모델로 우리가 돌린다</h3><p>운영자에게 여유 크레딧이 생기거나 지원 프로그램에 선정되면, 사용자가 올린 벤치를 주요 모델들로 돌려 결과를 붙일 계획이다. 지금은 기준 모델 넷을 한 번 돌려 붙인다.</p></div></li>
     </ol></section>
   <section class="sec"><h2>다른 흐름</h2>
     <div class="usecases">
@@ -605,7 +606,7 @@ function detail(name) {
   ${Object.entries(b.community.models).map(([k, v]) => `<tr><td><code>${esc(v.model || k)}</code></td><td>${esc(v.provider || '-')}</td><td class="num">${pct(v.median_acc)}</td><td class="num">${pct(v.min_acc)} ~ ${pct(v.max_acc)}</td><td class="num">${v.n_submissions}</td><td>${v.verified ? '<span class="chip">검증됨</span>' : esc(v.status)}</td></tr>`).join('')}</tbody></table></div>` : '<p class="meta">아직 제출이 없다.</p>'}
   <h2>표본 ${b.samples.length}건</h2>
   ${b.samples.map(s => `<div class="sample"><div><code>${esc(s.id)}</code> <span class="chip">${esc(s.class || '-')}</span> 정답 <b>${esc((b.choices || [])[s.target] ?? s.target)}</b> <span class="meta">${esc(s.label_source || '')}</span></div><div class="in">${esc(s.input)}</div>${s.evidence ? `<div class="meta">근거: ${esc(s.evidence)}</div>` : ''}</div>`).join('')}
-  <h2>작성자</h2><div class="ownercard">${ownerLine(b, true)}<div class="meta">${esc(o.bio || '')}</div>${others.length ? `<div class="meta">이 작성자의 다른 벤치: ${others.map(x => `<a href="#b-${esc(x.name)}">${esc(x.name)}</a>`).join(', ')}</div>` : ''}</div>
+  <h2>작성자</h2><div class="ownercard">${ownerLine(b, true)}<div class="meta">${esc(o.bio || '')}</div>${b.pointer && b.pointer.repo ? `<div class="meta">피드백: <a href="https://github.com/${esc(b.pointer.repo)}/issues/new?title=${encodeURIComponent('[' + b.name + '] ')}" target="_blank" rel="noopener">벤치 리포에 이슈 남기기</a> · 쓸모 있었으면 <a href="https://github.com/${esc(b.pointer.repo)}" target="_blank" rel="noopener">스타</a>. 스타는 신뢰 점수와 추천 가중에 반영된다. Claude Code 에서는 <code>benchlet star remote:${esc(b.owner)}/${esc(b.name)}</code></div>` : ''}${others.length ? `<div class="meta">이 작성자의 다른 벤치: ${others.map(x => `<a href="#b-${esc(x.name)}">${esc(x.name)}</a>`).join(', ')}</div>` : ''}</div>
   <h2>내 데이터로 포크</h2>
   <p class="meta">스킬 호출 문장을 복사해 Claude Code 에 붙인다. 생성기·질문·선택지·클래스 표를 가져오고 원자료 경로는 비워 둔다. 포크 관계는 매니페스트에 남아 계보로 보인다.</p>
   <pre id="fork">${esc(forkCmd)}</pre><button class="primary" id="copy">복사</button> <span class="meta" id="copied"></span>`;
