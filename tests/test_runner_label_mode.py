@@ -42,6 +42,9 @@ class FakeAnthropic(AnthropicClient):
 
     def _post(self, url, body):
         self.bodies.append((url, body))
+        if "output_config" in body and "answer" in body["output_config"]["format"]["schema"]["properties"]:
+            return {"content": [{"type": "text", "text": json.dumps({"answer": "B"})}],
+                    "usage": {"input_tokens": 80, "output_tokens": 5}, "stop_reason": "end_turn"}, 10, None
         if "output_config" in body:
             return {"content": [{"type": "text", "text": json.dumps({"label": "getting_spare_card"})}],
                     "usage": {"input_tokens": 50, "cache_read_input_tokens": 1900, "output_tokens": 12}, "stop_reason": "end_turn"}, 10, None
@@ -67,7 +70,29 @@ def test_anthropic_generative_letter_arm_reads_text_block_only():
     arm = resolve_arms(["anthropic:claude-haiku-5-5"])[0]
     small = dict(ITEM, choices=["a", "b", "c"], target=1)
     r = call_arm(c, arm, small, "generic", "generative")
-    assert r["pred_index"] is not None and r["err"] is None and r["prob_source"] == "none"
+    assert r["err"] is None and r["prob_source"] == "none" and r["answer_format"] == "json-schema-enum"
+    assert c.bodies[-1][1]["output_config"]["format"]["schema"]["properties"]["answer"]["enum"] == ["A", "B", "C"]
+    # 셔플된 위치 B 가 원래 인덱스로 복원된다
+    from benchlet.runner.templates import shuffled_order
+    assert r["pred_index"] == shuffled_order(small, "generic")[1]
+
+
+def test_anthropic_free_text_fallback_ignores_letters_inside_reasoning():
+    class Plain(FakeAnthropic):
+        def _post(self, url, body):
+            if "output_config" in body:
+                return None, 5, "HTTP 400 output_config is not supported"
+            return {"content": [{"type": "text", "text": "The energy E is 3 J.\n\n**B**"}],
+                    "usage": {"input_tokens": 10, "output_tokens": 9}, "stop_reason": "end_turn"}, 10, None
+    c = Plain()
+    r = c.generate_choice("claude-x", "q", 4)
+    assert r["pred_index"] is None and r["err"] == "답 글자를 못 읽음" and r["answer_format"] == "letter-text"
+    class One(Plain):
+        def _post(self, url, body):
+            if "output_config" in body:
+                return None, 5, "HTTP 400 output_config is not supported"
+            return {"content": [{"type": "text", "text": "C"}], "usage": {"input_tokens": 10, "output_tokens": 1}, "stop_reason": "end_turn"}, 10, None
+    assert One().generate_choice("claude-x", "q", 4)["pred_index"] == 2
 
 
 def test_anthropic_retries_without_thinking_on_400():

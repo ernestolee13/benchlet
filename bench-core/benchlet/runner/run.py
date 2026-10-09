@@ -88,7 +88,8 @@ def call_arm(client: ChatClient, arm: dict, item: dict, template: str, mode: str
             p = sum(votes) / len(votes) if votes else None
             return {"p_violation": p, "ms": r1["ms"] + r2["ms"], "cost": r1["cost"] + r2["cost"],
                     "in_tok": r1["in_tok"] + r2["in_tok"], "err": r1["err"] or r2["err"], "prob_source": "none",
-                    "provider": r1.get("provider")}
+                    "provider": r1.get("provider"), "raw_text": [r1.get("raw_text"), r2.get("raw_text")],
+                    "answer_format": r1.get("answer_format")}
         r1 = client.logprob_choice(arm["model"], binary_t(item, False), 2, arm.get("in_per_m", 0))
         r2 = client.logprob_choice(arm["model"], binary_t(item, True), 2, arm.get("in_per_m", 0))
         p = None
@@ -104,7 +105,8 @@ def call_arm(client: ChatClient, arm: dict, item: dict, template: str, mode: str
         r = client.generate_choice(arm["model"], prompt, n, arm.get("in_per_m", 0))
         pred = order[r["pred_index"]] if r["pred_index"] is not None else None
         return {"pred_index": pred, "probs": None, "ms": r["ms"], "cost": r["cost"], "in_tok": r["in_tok"],
-                "err": r["err"], "prob_source": "none", "provider": r.get("provider"), "order": order}
+                "err": r["err"], "prob_source": "none", "provider": r.get("provider"), "order": order,
+                "raw_text": r.get("raw_text"), "answer_format": r.get("answer_format")}
     r = client.logprob_choice(arm["model"], prompt, n, arm.get("in_per_m", 0))
     probs = None
     pred = None

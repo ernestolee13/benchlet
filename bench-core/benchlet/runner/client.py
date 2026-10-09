@@ -263,18 +263,38 @@ class AnthropicClient(ChatClient):
                 "_cost": cost, "_stop": resp.get("stop_reason")}, ms, None
 
     def generate_choice(self, model: str, prompt: str, n_labels: int, in_per_m: float = 0.0) -> dict:
-        """글자 답. 비용은 usage 와 가격표로 계산한다(in_per_m 은 쓰지 않는다)."""
-        resp, ms, err = self.chat(model, prompt)
-        out = {"ms": ms, "err": err, "pred_index": None, "in_tok": 0, "cost": 0.0, "provider": "anthropic", "raw_text": None}
+        """글자 답을 json_schema enum 으로 강제한다. 자유 생성이면 Haiku 5.5 가 풀이를 먼저 쓰고 마지막에 답을 두어
+        첫 글자 파서가 풀이 속 글자(E 등)를 집는다(2026-10-10 실측, mmlu-pro). enum 이면 다른 팔의 첫 토큰과 같은 「즉답」이다."""
+        letters = list(LETTERS[:n_labels])
+        schema = {"type": "object", "properties": {"answer": {"type": "string", "enum": letters}},
+                  "required": ["answer"], "additionalProperties": False}
+        body = {"model": model, "max_tokens": 1024, "messages": [{"role": "user", "content": prompt}],
+                "output_config": {"format": {"type": "json_schema", "schema": schema}}}
+        fmt = "json-schema-enum"
+        resp, ms, err = self._messages(body)
+        if err and "HTTP 400" in err and "output_config" in err:
+            body.pop("output_config"); fmt = "letter-text"
+            resp, ms2, err = self._messages(body); ms += ms2
+        out = {"ms": ms, "err": err, "pred_index": None, "in_tok": 0, "cost": 0.0, "provider": "anthropic", "raw_text": None,
+               "answer_format": fmt}
         if err:
             return out
-        out["in_tok"] = resp["usage"]["prompt_tokens"]; out["cost"] = resp["_cost"]
-        text = resp["choices"][0]["message"]["content"].strip()
-        out["raw_text"] = text[:8]
-        for chx in text:
-            if chx.upper() in LETTERS[:n_labels]:
-                out["pred_index"] = LETTERS.index(chx.upper()); break
-        if out["pred_index"] is None:
+        out["in_tok"], out["cost"] = self._usage(resp, model)
+        text = self._text(resp).strip()
+        out["raw_text"] = text[:24]
+        ans = None
+        if text.startswith("{"):
+            try:
+                ans = str(json.loads(text).get("answer", "")).strip().upper()
+            except json.JSONDecodeError:
+                ans = None
+        if ans is None:
+            # 자유 텍스트 폴백: 한 글자 답이거나 첫 줄의 첫 글자만 믿는다. 풀이 속 글자는 집지 않는다
+            first = text.split("\n", 1)[0].strip().strip("*()[]「」.: ")
+            ans = first.upper() if len(first) == 1 else None
+        if ans in letters:
+            out["pred_index"] = letters.index(ans)
+        else:
             out["err"] = "답 글자를 못 읽음"
         return out
 
