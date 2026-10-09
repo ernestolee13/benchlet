@@ -32,6 +32,14 @@ def generic_choice(item: dict, order: list) -> str:
     return f"{item['question']}\n\n---\n{item['input']}\n---\n\n{opts}\n\n글자 하나만 답한다."
 
 
+def generic_label(item: dict) -> tuple:
+    """선택지가 LETTERS 보다 많을 때. (system, user). 라벨 목록은 고정 순서(셔플하면 프롬프트 캐시가 깨진다)."""
+    labels = "\n".join(item["choices"])
+    system = f"{item['question']}\n\nAllowed labels (answer with exactly one, copied verbatim):\n{labels}"
+    user = f"---\n{item['input']}\n---\n\n라벨 이름 하나만 답한다. Answer with one label name only."
+    return system, user
+
+
 def generic_jev(item: dict) -> tuple:
     """(state, questions, answer_key)"""
     if item["type"] == "binary":

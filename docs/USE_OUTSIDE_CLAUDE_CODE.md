@@ -23,6 +23,7 @@ bench-core/bin/benchlet publish --bench benches/example --github           # gh 
 ```
 OPENROUTER_API_KEY=...          # OpenRouter 예시 모델(glm, qwen, deepseek, jev)을 쓸 때
 BENCHLET_BASE_URL=https://.../v1   # custom:<model> 을 쓸 때. 첫 토큰 로그프롭을 주는 OpenAI 호환 엔드포인트
+ANTHROPIC_API_KEY=...              # anthropic:<model> 을 쓸 때. 로그프롭 없이 생성·라벨 팔로 돈다
 BENCHLET_API_KEY=...
 ```
 

@@ -5,6 +5,7 @@
   qwen/qwen3.8-27b@parasail  OpenRouter 모델@provider 핀
   custom:<model>             임의의 OpenAI 호환 엔드포인트. BENCHLET_BASE_URL · BENCHLET_API_KEY 환경변수 둘만 받는다
   jev                        typed 팔 (OpenRouter decisions)
+  anthropic:<model>          Anthropic Messages API 직접 호출. 로그확률이 없어 생성(글자) 팔, 선택지가 많으면 라벨(json_schema enum) 팔. 키는 ANTHROPIC_API_KEY
 """
 from __future__ import annotations
 
@@ -12,6 +13,8 @@ import json
 import os
 
 from ..config import VERIFIED_TABLE, OPENROUTER_BASE_URL
+
+ANTHROPIC_BASE_URL = "https://api.anthropic.com/v1"
 
 ARMS = {
     "glm":      {"model": "z-ai/glm-4.7-flash",            "provider": "cloudflare",   "in_per_m": 0.0605, "family": "GLM",      "mode": "logprob"},
@@ -62,6 +65,13 @@ def resolve_arms(specs: list) -> list:
             continue
         if spec in ARMS:
             a = dict(ARMS[spec]); a["key"] = spec; a["preset"] = "openrouter"
+        elif spec.startswith("anthropic:"):
+            from .client import anthropic_price
+            model = spec.split(":", 1)[1]
+            a = {"key": spec, "model": model, "provider": "anthropic", "family": "Anthropic", "mode": "generative",
+                 "in_per_m": anthropic_price(model)[0], "preset": "anthropic", "base_url": ANTHROPIC_BASE_URL,
+                 "api_key_env": "ANTHROPIC_API_KEY", "extra_body": {}}
+            out.append(a); continue
         elif spec.startswith("custom:"):
             model = spec.split(":", 1)[1]
             a = {"key": spec, "model": model, "provider": os.environ.get("BENCHLET_PROVIDER") or None,

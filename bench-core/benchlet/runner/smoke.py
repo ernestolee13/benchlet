@@ -10,7 +10,7 @@ from dataclasses import dataclass, field
 
 from ..schema.load import Bench
 from .arms import resolve_arms
-from .run import make_client, call_arm
+from .run import make_client, call_arm, effective_mode
 from .templates import build
 
 SPREAD_MAX = 0.05
@@ -71,6 +71,25 @@ def smoke_bench(bench: Bench, arm_specs: list, repeats: int = 3, progress: bool 
     for a in arms:
         client = make_client(a)
         v = SmokeVerdict(arm=a["key"], mode=a["mode"], usable=True)
+        if items and effective_mode(items[0], a["mode"]) == "label":
+            # 라벨 팔: 라벨 이름이 읽히는지, 뻔한 5건을 맞히는지만 본다 (확률 없음)
+            v.mode = "label"; hits, n = 0, 0
+            for it in items:
+                r = call_arm(client, a, it, bench.template, "label")
+                v.n_calls += 1; v.cost += r.get("cost") or 0
+                if r.get("err"):
+                    v.reasons.append(f"오류 {r['err']}"); continue
+                n += 1; ok = int(r.get("pred_index") == it["target"]); hits += ok
+                v.per_item.append({"id": it["id"], "target": it["target"], "hit": ok, "pred": r.get("pred_index")})
+            v.smoke_acc = hits / n if n else None
+            v.usable = n >= len(items) - 1          # 5건 중 4건 이상 읽히면 쓴다. 못 읽은 항목은 오류로 세지 않는다
+            if not v.usable:
+                v.reasons.append("라벨 이름을 못 읽는 항목이 많다")
+            _miss_reason(v, hits, n)
+            verdicts[a["key"]] = v
+            if progress:
+                print(f"  {a['key']:10} {'OK' if v.usable else 'NO'} label-mode read={n}/{len(items)} acc5={v.smoke_acc}", flush=True)
+            continue
         if a["mode"] == "typed":
             hits, n = 0, 0
             for it in items:

@@ -13,6 +13,36 @@ import urllib.request
 from urllib.parse import urlparse
 
 LETTERS = "ABCDEFGHIJKLMN"
+# 선택지가 LETTERS 보다 많으면(라우터·의도 분류 77~150개) 글자 대신 라벨 이름을 답하게 한다 (mode=label, 확률 없음)
+LABEL_MAX_TOKENS = 48
+
+
+def match_label(text: str, labels: list) -> int | None:
+    """모델이 낸 텍스트에서 라벨 하나를 고른다. 정확 일치 → 대소문자·공백·따옴표 무시 → 유일한 부분 일치. 못 고르면 None."""
+    if not text:
+        return None
+    t = text.strip()
+    if t.startswith("{"):
+        try:
+            obj = json.loads(t)
+            if isinstance(obj, dict) and isinstance(obj.get("label"), str):
+                t = obj["label"]
+        except json.JSONDecodeError:
+            pass
+    first = t.split("\n", 1)[0].strip().strip("`\"'「」 .:").strip()
+    if first in labels:
+        return labels.index(first)
+    def norm(x):
+        return "".join(ch for ch in x.lower() if ch.isalnum())
+    nf = norm(first)
+    if nf:
+        hits = [i for i, l in enumerate(labels) if norm(l) == nf]
+        if len(hits) == 1:
+            return hits[0]
+        hits = [i for i, l in enumerate(labels) if norm(l) in nf or nf in norm(l)]
+        if len(hits) == 1:
+            return hits[0]
+    return None
 
 
 class ChatClient:
@@ -98,6 +128,24 @@ class ChatClient:
             out["err"] = "답 글자를 못 읽음"
         return out
 
+    # ── 라벨 팔: 선택지가 많을 때 라벨 이름을 생성시킨다. 확률 없음 ──────────
+    def label_choice(self, model: str, system: str, user: str, labels: list, in_per_m: float = 0.0) -> dict:
+        resp, ms, err = self.chat(model, system + "\n\n" + user, max_tokens=LABEL_MAX_TOKENS, temperature=0)
+        out = {"ms": ms, "err": err, "pred_index": None, "in_tok": 0, "cost": 0.0, "provider": None, "raw_text": None,
+               "answer_format": "label-name"}
+        if err:
+            return out
+        u = resp.get("usage") or {}
+        out["in_tok"] = u.get("prompt_tokens") or 0
+        out["cost"] = out["in_tok"] / 1e6 * in_per_m
+        out["provider"] = resp.get("provider")
+        text = (((resp.get("choices") or [{}])[0].get("message") or {}).get("content") or "").strip()
+        out["raw_text"] = text[:60]
+        out["pred_index"] = match_label(text, labels)
+        if out["pred_index"] is None:
+            out["err"] = "라벨 이름을 못 읽음"
+        return out
+
     # ── typed 팔: OpenRouter decisions ────────────────────────────────────
     def decisions(self, url: str, model: str, state: str, questions: dict, in_per_m: float = 0.0):
         resp, ms, err = self._post(url, {"model": model, "state": state, "questions": questions})
@@ -132,3 +180,128 @@ def read_probs(resp: dict, n_labels: int):
     tot = sum(raw.values())
     probs = [raw.get(LETTERS[i], 0.0) / tot for i in range(n_labels)]
     return probs, round(tot, 4), "ok"
+
+
+# ── Anthropic Messages API. 로그확률이 없어 생성(글자) 또는 라벨(json_schema enum) 팔로만 쓴다 ──────────
+# 가격 (USD / 1M 토큰): 입력, 캐시 읽기, 캐시 쓰기(5분), 출력. 모델 id 접두로 맞춘다. 없으면 0 으로 두고 비용을 기록하지 않는다
+# 출처: platform.claude.com/docs/en/about-claude/pricing (2026-10-09 확인). 입력, 캐시 읽기, 캐시 쓰기 5분, 출력
+ANTHROPIC_PRICES = {
+    "claude-haiku-5-5":  (0.10, 0.01, 0.125, 0.50),
+    "claude-haiku-4-5":  (1.00, 0.10, 1.25, 5.00),
+    "claude-sonnet-5-5": (2.00, 0.10, 2.50, 10.00),
+    "claude-opus-5-5":   (4.00, 0.20, 5.00, 20.00),
+    "claude-fable-5-1":  (10.00, 0.25, 12.50, 50.00),
+}
+
+
+def anthropic_price(model: str) -> tuple:
+    for k, v in ANTHROPIC_PRICES.items():
+        if model.startswith(k):
+            return v
+    return (0.0, 0.0, 0.0, 0.0)
+
+
+class AnthropicClient(ChatClient):
+    VERSION = "2023-06-01"
+
+    def _post(self, url: str, body: dict):
+        req_bytes = json.dumps(body).encode()
+        headers = {"x-api-key": self._key, "anthropic-version": self.VERSION, "Content-Type": "application/json"}
+        t0 = time.time()
+        err = None
+        for attempt in range(len(self.RETRY_WAITS) + 1):
+            req = urllib.request.Request(url, data=req_bytes, headers=headers)
+            try:
+                with urllib.request.urlopen(req, timeout=self.timeout) as r:
+                    return json.loads(r.read()), int((time.time() - t0) * 1000), None
+            except urllib.error.HTTPError as e:
+                msg = e.read().decode(errors="replace")[:200].replace(self._key, "***")
+                err = f"HTTP {e.code} {msg}"
+                if e.code == 529:                       # overloaded
+                    pass
+                elif e.code not in self.RETRY_CODES or attempt == len(self.RETRY_WAITS):
+                    break
+            except Exception as e:                       # noqa: BLE001
+                err = type(e).__name__
+                if attempt == len(self.RETRY_WAITS):
+                    break
+            time.sleep(self.RETRY_WAITS[min(attempt, len(self.RETRY_WAITS) - 1)])
+        return None, int((time.time() - t0) * 1000), err
+
+    def _messages(self, body: dict):
+        """thinking 을 끈다(Haiku 5.5 는 기본 켜짐이라 작은 max_tokens 에서 빈 응답이 온다, 2026-10-09 실측).
+        적응형 thinking 모델이 disabled 를 400 으로 거부하면 필드를 빼고 한 번 더 보낸다. temperature 는 보내지 않는다(신형이 거부)."""
+        b = dict(body); b.setdefault("thinking", {"type": "disabled"})
+        resp, ms, err = self._post(self.base_url + "/messages", b)
+        if err and "HTTP 400" in err and "thinking" in b:
+            b.pop("thinking", None)
+            resp, ms2, err = self._post(self.base_url + "/messages", b); ms += ms2
+        return resp, ms, err
+
+    @staticmethod
+    def _text(resp: dict) -> str:
+        return "".join(c.get("text", "") for c in (resp.get("content") or []) if c.get("type") == "text")
+
+    @staticmethod
+    def _usage(resp: dict, model: str) -> tuple:
+        """(prompt_tokens 합계, 비용 USD)"""
+        u = resp.get("usage") or {}
+        i, cr, cw, o = (u.get("input_tokens") or 0, u.get("cache_read_input_tokens") or 0,
+                        u.get("cache_creation_input_tokens") or 0, u.get("output_tokens") or 0)
+        pi, pcr, pcw, po = anthropic_price(model)
+        return i + cr + cw, (i * pi + cr * pcr + cw * pcw + o * po) / 1e6
+
+    def chat(self, model: str, prompt: str, **params):
+        """OpenAI 호환 모양으로 돌려준다(choices[0].message.content, usage.prompt_tokens). logprobs 는 없다."""
+        # 글자 답 하나지만 적응형 thinking 이 켜진 모델은 생각 블록이 예산을 먹으므로 넉넉히 준다. 텍스트 블록만 읽는다
+        body = {"model": model, "max_tokens": 512, "messages": [{"role": "user", "content": prompt}]}
+        resp, ms, err = self._messages(body)
+        if err:
+            return None, ms, err
+        toks, cost = self._usage(resp, model)
+        return {"choices": [{"message": {"content": self._text(resp)}}], "usage": {"prompt_tokens": toks},
+                "_cost": cost, "_stop": resp.get("stop_reason")}, ms, None
+
+    def generate_choice(self, model: str, prompt: str, n_labels: int, in_per_m: float = 0.0) -> dict:
+        """글자 답. 비용은 usage 와 가격표로 계산한다(in_per_m 은 쓰지 않는다)."""
+        resp, ms, err = self.chat(model, prompt)
+        out = {"ms": ms, "err": err, "pred_index": None, "in_tok": 0, "cost": 0.0, "provider": "anthropic", "raw_text": None}
+        if err:
+            return out
+        out["in_tok"] = resp["usage"]["prompt_tokens"]; out["cost"] = resp["_cost"]
+        text = resp["choices"][0]["message"]["content"].strip()
+        out["raw_text"] = text[:8]
+        for chx in text:
+            if chx.upper() in LETTERS[:n_labels]:
+                out["pred_index"] = LETTERS.index(chx.upper()); break
+        if out["pred_index"] is None:
+            out["err"] = "답 글자를 못 읽음"
+        return out
+
+    def label_choice(self, model: str, system: str, user: str, labels: list, in_per_m: float = 0.0) -> dict:
+        """라벨 목록은 system 블록에 두고 프롬프트 캐시를 건다. 답은 json_schema enum 으로 강제한다."""
+        schema = {"type": "object", "properties": {"label": {"type": "string", "enum": list(labels)}},
+                  "required": ["label"], "additionalProperties": False}
+        # 적응형 thinking 이 켜진 모델(disabled 거부)은 생각 토큰이 예산을 먹는다. 200 이면 Sonnet 5.5 가 5건 중 1건 max_tokens 로 끊겼다
+        body = {"model": model, "max_tokens": 1024,
+                "system": [{"type": "text", "text": system, "cache_control": {"type": "ephemeral"}}],
+                "messages": [{"role": "user", "content": user}],
+                "output_config": {"format": {"type": "json_schema", "schema": schema}}}
+        fmt = "json-schema-enum"
+        resp, ms, err = self._messages(body)
+        if err and "HTTP 400" in err and "output_config" in err:
+            body.pop("output_config"); body["max_tokens"] = LABEL_MAX_TOKENS; fmt = "label-name"
+            resp, ms2, err = self._messages(body); ms += ms2
+        out = {"ms": ms, "err": err, "pred_index": None, "in_tok": 0, "cost": 0.0, "provider": "anthropic",
+               "raw_text": None, "answer_format": fmt}
+        if err:
+            return out
+        out["in_tok"], out["cost"] = self._usage(resp, model)
+        u = resp.get("usage") or {}
+        out["cache_read"] = u.get("cache_read_input_tokens") or 0
+        text = self._text(resp).strip()
+        out["raw_text"] = text[:60]
+        out["pred_index"] = match_label(text, labels)
+        if out["pred_index"] is None:
+            out["err"] = "라벨 이름을 못 읽음" + (f" (stop={resp.get('stop_reason')})" if resp.get("stop_reason") != "end_turn" else "")
+        return out

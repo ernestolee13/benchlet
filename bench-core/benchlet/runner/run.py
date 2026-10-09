@@ -14,8 +14,8 @@ from pathlib import Path
 from ..config import read_env_key, OPENROUTER_DECISIONS_URL
 from ..schema.load import Bench
 from .arms import resolve_arms
-from .client import ChatClient
-from .templates import build, shuffled_order
+from .client import ChatClient, AnthropicClient, LETTERS
+from .templates import build, shuffled_order, generic_label
 
 
 @dataclass
@@ -35,13 +35,29 @@ def make_client(arm: dict) -> ChatClient:
         sys.exit(f"{arm['api_key_env']} 가 없다 (환경변수 또는 ~/.config/benchlet/env). 키가 없으면 실행하지 말고 게시만 해라(경로 0)")
     if not arm.get("base_url"):
         sys.exit("BENCHLET_BASE_URL 이 없다 (custom: 팔)")
+    if arm.get("preset") == "anthropic":
+        return AnthropicClient(arm["base_url"], key, {})
     return ChatClient(arm["base_url"], key, arm.get("extra_body") or {})
+
+
+def effective_mode(item: dict, mode: str) -> str:
+    """선택지가 글자 수(LETTERS)를 넘으면 typed 를 빼고 전부 라벨 팔이다."""
+    if mode != "typed" and len(item["choices"]) > len(LETTERS):
+        return "label"
+    return mode
 
 
 def call_arm(client: ChatClient, arm: dict, item: dict, template: str, mode: str) -> dict:
     """항목 하나·팔 하나. 반환 레코드는 구식 결과 형식."""
     binary_t, choice_t, jev_t = build(template)
     n = len(item["choices"])
+    mode = effective_mode(item, mode)
+    if mode == "label":
+        system, user = generic_label(item)
+        r = client.label_choice(arm["model"], system, user, item["choices"], arm.get("in_per_m", 0))
+        return {"pred_index": r["pred_index"], "probs": None, "ms": r["ms"], "cost": r["cost"], "in_tok": r["in_tok"],
+                "err": r["err"], "prob_source": "none", "provider": r.get("provider"), "order": None,
+                "raw_text": r.get("raw_text"), "answer_format": r.get("answer_format"), "cache_read": r.get("cache_read")}
     if mode == "typed":
         state, questions, key = jev_t(item)
         r = client.decisions(OPENROUTER_DECISIONS_URL, arm["model"], state, questions, arm.get("in_per_m", 0))
@@ -143,6 +159,15 @@ def run_bench(bench: Bench, cfg: RunConfig) -> dict:
     for a in arms:
         agg.setdefault(a["key"], {"n": 0, "ok": 0, "hit": 0, "ms": 0, "cost": 0.0})
     workers = max(1, int(cfg.concurrency or 1))
+    # 라벨 팔 중 프롬프트 캐시를 쓰는 팔(Anthropic)은 첫 호출을 순차로 한 번 해 캐시를 만든다. 병렬 첫 호출이 전부 캐시 없이 나가는 걸 막는다
+    def mode_of(a: dict) -> str:
+        m = cfg.arm_modes.get(a["key"], a["mode"])
+        return effective_mode(items[0], m) if items else m
+    warm = {}
+    for a in arms:
+        if items and a.get("preset") == "anthropic" and mode_of(a) == "label" and workers > 1:
+            r = call_arm(clients[a["key"]], a, items[0], bench.template, "label")
+            warm[a["key"]] = {"cost": r.get("cost"), "err": r.get("err")}
     if workers == 1:
         for n, it in enumerate(items, 1):
             rec = one(it); tally(it, rec); show(n, it, rec); out.append(rec)
@@ -160,10 +185,10 @@ def run_bench(bench: Bench, cfg: RunConfig) -> dict:
         "items_sha256": bench.items_sha256, "template": bench.template,
         "date": dt.date.today().isoformat(),
         "arms": {a["key"]: {"model": a["model"], "provider": a.get("provider"), "family": a["family"],
-                            "mode": cfg.arm_modes.get(a["key"], a["mode"]),
-                            "prob_source": {"logprob": "logprob", "typed": "typed", "generative": "none"}[cfg.arm_modes.get(a["key"], a["mode"])],
+                            "mode": mode_of(a),
+                            "prob_source": {"logprob": "logprob", "typed": "typed", "generative": "none", "label": "none"}[mode_of(a)],
                             "base_url": clients[a["key"]].host, "in_per_m": a.get("in_per_m"),
-                            "smoke": (cfg.smoke or {}).get(a["key"])} for a in arms},
+                            "smoke": (cfg.smoke or {}).get(a["key"]), "cache_warm": warm.get(a["key"])} for a in arms},
         "items": out, "agg": agg,
     }
     if cfg.out:

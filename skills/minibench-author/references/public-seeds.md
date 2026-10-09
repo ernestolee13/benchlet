@@ -48,8 +48,13 @@
 | retrieval-rag | halueval-qa-mini | 답변이 근거에 비추어 환각인가 | B |
 | commonsense (추론) | musr-murder-mini, musr-objects-mini, bbh-judgment-mini, openbookqa-mini, hellaswag-mini, winogrande-mini, arc-challenge-mini | 범인·물건 위치·인과·경로·상식 | A, B |
 | knowledge-exam, truthfulness | mmlu-pro-mini, mmlu-mini, truthfulqa-mc1-mini | 비교용 지식 시험 | A |
+| agent-tools (라우터) | banking77-router-mini, clinc50-router-mini, clinc150-router-mini | 문의를 의도 77·50·150개 중 하나로 (BANKING77, CLINC150) | B, 라벨 팔 |
 
 포크할 때는 시드의 질문을 사용자 판정 문구로 바꾸지 말고, 사용자 데이터로 새 벤치를 만들되 같은 서명·키워드를 붙여 「유형별 추천」이 묶이게 한다.
+
+### 경로 B'. 선택지가 많은 라우터 벤치 (`src/build_router_seeds.py`)
+
+의도 분류처럼 라벨이 수십 개면 글자 로그확률을 못 쓴다. 러너가 라벨 이름 생성(mode=label)으로 돌고 정확도만 본다. 2026-10-09 에 BANKING77(77)·CLINC150(150, 50 부분집합)을 원천 test 분할에서 무작위 100건으로 넣었다. 라벨 10개는 Haiku 둘 다 98% 라 변별이 없어 뺐다. 라벨 수가 늘수록 작은 모델과 큰 모델의 차이가 벌어지는지가 이 묶음의 질문이다.
 
 ## 4. 알려진 약점
 
