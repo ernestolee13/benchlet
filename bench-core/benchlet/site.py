@@ -326,6 +326,19 @@ def _esc(s) -> str:
     return str(s or "").replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace('"', "&quot;")
 
 
+LICENSE_URLS = {
+    "CC-BY-4.0": "https://creativecommons.org/licenses/by/4.0/", "CC-BY": "https://creativecommons.org/licenses/by/4.0/",
+    "CC-BY-3.0": "https://creativecommons.org/licenses/by/3.0/", "CC-BY-SA-4.0": "https://creativecommons.org/licenses/by-sa/4.0/",
+    "CC0": "https://creativecommons.org/publicdomain/zero/1.0/", "MIT": "https://opensource.org/license/mit/",
+    "Apache-2.0": "https://www.apache.org/licenses/LICENSE-2.0", "ODC-BY": "https://opendatacommons.org/licenses/by/1-0/",
+}
+
+
+def _license_url(lic) -> str:
+    """Dataset JSON-LD 의 license. 서치콘솔이 빈 값을 「누락」으로 센다(2026-10 경고). 모르는 표기는 문자열 그대로 둔다."""
+    return LICENSE_URLS.get(str(lic or "").strip(), str(lic or "")) or "https://creativecommons.org/licenses/by/4.0/"
+
+
 def _seo_head(data: dict) -> str:
     title = "benchlet | 내 데이터로 만든 판정 미니벤치 갤러리"
     hreflang = (f'<link rel="alternate" hreflang="ko" href="{SITE_URL}/">\n<link rel="alternate" hreflang="en" href="{SITE_URL}/en">\n'
@@ -342,7 +355,7 @@ def _seo_head(data: dict) -> str:
          "description": f"판정 미니벤치 {n}개. 항목 형식은 bench.yaml 과 items.jsonl.",
          "dataset": [{"@type": "Dataset", "name": b["name"], "url": f"{SITE_URL}/#b-{b['name']}", "description": (b.get("question") or "").split("\n")[0][:200],
                       "creator": {"@type": "Person", "name": b.get("owner"), "url": f"https://github.com/{b.get('owner')}"},
-                      "license": "https://creativecommons.org/licenses/by/4.0/" if b.get("license") == "CC-BY-4.0" else None}
+                      "license": _license_url(b.get("license"))}
                      for b in data["benches"]]},
     ]}
     return hreflang + "\n".join([
