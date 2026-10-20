@@ -362,6 +362,8 @@ def _seo_head(data: dict) -> str:
         f'<meta name="description" content="{_esc(DESCRIPTION)}">',
         f'<link rel="canonical" href="{SITE_URL}/">',
         '<meta name="theme-color" content="#0f6f68">',
+        # Vercel Web Analytics (프로젝트에 켜져 있는데 태그가 없어 2026-10-20 까지 방문 데이터가 0 이었다). 쿠키 없음
+        '<script defer src="/_vercel/insights/script.js"></script>',
         '<meta property="og:type" content="website">', f'<meta property="og:site_name" content="{SITE_NAME}">',
         f'<meta property="og:url" content="{SITE_URL}/">', f'<meta property="og:title" content="{_esc(title)}">',
         f'<meta property="og:description" content="{_esc(DESCRIPTION)}">', '<meta property="og:locale" content="ko_KR">',
