@@ -154,7 +154,8 @@ class ChatClient:
             return out
         u = resp.get("usage") or {}
         out["in_tok"] = u.get("input_tokens") or u.get("prompt_tokens") or 0
-        out["cost"] = out["in_tok"] / 1e6 * in_per_m
+        # 엔드포인트가 usage.cost(USD) 를 주면 그 값을 쓴다(OpenRouter decisions). 없으면 입력 토큰 × 단가
+        out["cost"] = float(u["cost"]) if isinstance(u.get("cost"), (int, float)) else out["in_tok"] / 1e6 * in_per_m
         out["model"] = resp.get("model")
         out["answers"] = resp.get("answers") or {}
         return out

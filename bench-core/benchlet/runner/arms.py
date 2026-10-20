@@ -25,6 +25,8 @@ ARMS = {
     "gemma":    {"model": "google/gemma-4-31b-it",         "provider": "coreweave",    "in_per_m": 0.09,   "family": "Gemma",    "mode": "logprob"},
     "nemotron": {"model": "nvidia/nemotron-3.5-lightning", "provider": "coreweave",    "in_per_m": 0.06,   "family": "NVIDIA",   "mode": "logprob"},
     "jev":      {"model": "typesafe/jev-1.13",             "provider": "openrouter",   "in_per_m": 0.042,  "family": "Jev",      "mode": "typed"},
+    # OpenAI Decisions API (gpt-6-luna, 2026-10 공개 베타). OpenRouter 의 같은 decisions 엔드포인트가 같은 요청·응답 모양으로 중계한다. 입력만 과금
+    "luna":     {"model": "openai/gpt-6-luna-decisions",   "provider": "openrouter",   "in_per_m": 0.10,   "family": "OpenAI",   "mode": "typed"},
 }
 
 _FAMILY_HINT = [("deepseek", "DeepSeek"), ("qwen", "Qwen"), ("glm", "GLM"), ("gemma", "Gemma"), ("gemini", "Gemini"),

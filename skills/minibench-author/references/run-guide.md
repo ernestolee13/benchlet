@@ -34,3 +34,7 @@
 ## Anthropic 모델을 직접 돌릴 때 (`anthropic:<model>`)
 
 Messages API 를 직접 부른다. 키는 `ANTHROPIC_API_KEY`. 로그확률이 없으므로 이진·14개 이하 선택은 생성 팔(답 글자를 읽음), 그 이상은 라벨 팔인데 Anthropic 은 `output_config.format` 의 json_schema enum 으로 라벨을 강제하고 라벨 목록 system 블록에 프롬프트 캐시를 건다(병렬 실행 전에 한 번 순차 호출로 캐시를 만든다). 2026-10-09 실측으로 알게 된 것: temperature 는 보내지 않는다(신형이 400). `thinking: disabled` 를 거부하는 적응형 모델이 있어 400 이면 빼고 다시 보낸다. 그러면 생각 토큰이 출력 예산을 먹으므로 라벨 팔 max_tokens 는 1024 다(200 이면 Sonnet 5.5 가 5건 중 1건 끊겼다). 비용은 usage 와 가격표(입력, 캐시 읽기, 캐시 쓰기, 출력)로 계산해 다른 팔처럼 결과에 남는다. 문항을 수천 건으로 늘릴 때는 Message Batches(50% 할인)를 쓰는 게 맞지만 러너에는 아직 없다.
+
+## 판단 전용(typed) 모델 둘: Jev 와 OpenAI Decisions
+
+`jev`(typesafe/jev-1.13)와 `luna`(openai/gpt-6-luna-decisions, OpenAI Decisions API 공개 베타 2026-10-06)는 둘 다 OpenRouter 의 decisions 엔드포인트로 같은 요청(state, questions)과 같은 응답(noul 확률, choice 와 선택지별 확률, confidence)을 쓴다. 출력 토큰은 무료이고 입력만 과금이다(Jev 0.042, Luna 0.10 달러/M). 비용은 응답의 `usage.cost` 를 그대로 기록한다. 실측 메모: Luna 는 확률을 0.01 단위로 반올림해 준다(noul 0, 0.91 같은 값). AUROC 를 볼 때 확률값 종류 수를 같이 본다. 우리 환경 벤치 32개 1,841건에 Luna 한 바퀴가 0.15달러다.

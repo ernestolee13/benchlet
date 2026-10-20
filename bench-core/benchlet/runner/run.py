@@ -201,8 +201,12 @@ def run_bench(bench: Bench, cfg: RunConfig) -> dict:
 
 def merge_results(old: dict, new: dict) -> dict:
     """같은 벤치(items_sha256 동일)의 기존 결과에 새 실행의 팔만 덮어쓴다. 다른 팔의 항목·집계는 그대로 둔다."""
-    if old.get("items_sha256") != new.get("items_sha256"):
+    if old.get("items_sha256") and old.get("items_sha256") != new.get("items_sha256"):
         raise ValueError("items_sha256 이 다르다. 다른 판본의 결과에는 합칠 수 없다")
+    if not old.get("items_sha256"):
+        # 구식 결과(씨앗·sns 초기 실행)에는 해시가 없다. 항목 id 가 전부 겹칠 때만 같은 판본으로 본다
+        if {it["id"] for it in old["items"]} != {it["id"] for it in new["items"]}:
+            raise ValueError("구식 결과의 항목 id 가 새 실행과 다르다. 합칠 수 없다")
     arms = set(new["arms"])
     out = dict(old)
     out["arms"] = {**old.get("arms", {}), **new["arms"]}
@@ -215,6 +219,7 @@ def merge_results(old: dict, new: dict) -> dict:
             rec["arms"].update(by_id[it["id"]]["arms"])
         merged.append(rec)
     out["items"] = merged
+    out["items_sha256"] = old.get("items_sha256") or new.get("items_sha256")
     out["date"] = new.get("date", old.get("date"))
     out.setdefault("merged_runs", []).append({"date": new.get("date"), "arms": sorted(arms)})
     return out

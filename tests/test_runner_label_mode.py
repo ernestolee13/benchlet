@@ -119,3 +119,24 @@ def test_openai_compatible_label_arm_generates_label_name():
     assert r["pred_index"] == 3 and r["answer_format"] == "label-name" and r["order"] is None
     system, user = generic_label(ITEM)
     assert all(l in system for l in LABELS) and ITEM["input"] in user
+
+
+def test_luna_preset_is_typed_and_decisions_cost_comes_from_usage():
+    from benchlet.runner.run import merge_results
+    a = resolve_arms(["luna"])[0]
+    assert a["mode"] == "typed" and a["model"] == "openai/gpt-6-luna-decisions" and a["api_key_env"] == "OPENROUTER_API_KEY"
+
+    class FakeDecisions(ChatClient):
+        def _post(self, url, body):
+            return {"answers": {"q": {"type": "noul", "noul": 0.2}}, "usage": {"input_tokens": 369, "output_tokens": 0, "cost": 3.69e-05},
+                    "model": "openai/gpt-6-luna-decisions-20261006"}, 5, None
+    r = FakeDecisions("https://openrouter.ai/api/v1", "k").decisions("u", a["model"], "s", {"q": {}}, a["in_per_m"])
+    assert abs(r["cost"] - 3.69e-05) < 1e-12 and r["in_tok"] == 369
+    # 구식 결과(items_sha256 없음)에도 항목 id 가 같으면 합쳐진다
+    old = {"items": [{"id": "x-1", "arms": {"jev": {"p_violation": 0.1}}}], "arms": {"jev": {}}, "agg": {"jev": {}}}
+    new = {"items_sha256": "abc", "items": [{"id": "x-1", "arms": {"luna": {"p_violation": 0.2}}}], "arms": {"luna": {}}, "agg": {"luna": {}}}
+    m = merge_results(old, new)
+    assert m["items"][0]["arms"] == {"jev": {"p_violation": 0.1}, "luna": {"p_violation": 0.2}} and m["items_sha256"] == "abc"
+    import pytest
+    with pytest.raises(ValueError):
+        merge_results(old, dict(new, items=[{"id": "y-9", "arms": {}}]))
