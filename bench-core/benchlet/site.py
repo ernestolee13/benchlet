@@ -233,6 +233,7 @@ benchlet run --bench my-norm --arms glm,qwen,jev</pre></div></div></section>
 <footer class="site"><span>benchlet</span><a href="https://github.com/ernestolee13/benchlet">tool repo</a><a href="https://github.com/ernestolee13/benchlet-benches">bench repo</a><a href="llms.txt">llms.txt</a><a href="/">한국어</a><span>MIT</span></footer>
 </main>'''
     return ("<!doctype html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1, viewport-fit=cover\">\n"
+            + '<script defer src="/_vercel/insights/script.js"></script>\n'
             + head + HEAD_PART.replace("<title>benchlet 갤러리</title>", "") + "\n</head>\n<body>\n" + body + "\n</body>\n</html>\n")
 
 
